@@ -1,2 +1,2 @@
-# ArtMorph-booklet
-The Art of Morph
+# The Art of Morph
+How-to design a new Morph
