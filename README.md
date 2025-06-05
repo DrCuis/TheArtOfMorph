@@ -1,7 +1,7 @@
 # The Art of Morph
 
-This booklet explains how to design new Morph, as widget or as
-graphics tools, from scratch or by composing Morph.
+This booklet explains how to design new Morph, as a widget or as
+a graphic tool, from scratch or by composing Morphs.
 
 ## License 
 
