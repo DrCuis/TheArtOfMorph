@@ -1,2 +1,4 @@
-# ArtMorph-booklet
-The Art of Morph
+# The Art of Morph
+
+- Read (https://github.com/DrCuis/TheCuisBook/blob/master/README.md) to learn about the commands to use to edit the booklet
+
