@@ -1,5 +1,5 @@
-@node Chapter 1
-@chapter Chapter 1
+@node Introduction
+@chapter Introduction
 
 @quotation
 The computer is simply an instrument whose music is ideas.
@@ -8,59 +8,81 @@ The computer is simply an instrument whose music is ideas.
 
 @*
 
-An introduction to this chapter.
+@cuis{} offers the possibility to easily design your own Morphs --
+widgets you can interact with and later integrate in your GUI
+application. There are three ways to design a custom Morph: an
+aggregate of existing Morphs, a design from scratch or a combination
+of the two former approaches.
 
-@cindex editing @subentry menu
-@cindex editing @subentry chapter naming
+Building a new Morph with an aggregate of existing Morphs is mainly
+about laying out together Morphs and let the aggregated Morphs manage
+the low level drawings and input event operations. When there is a
+need for a custom Morph, this is the path to investigate first; if
+there is no way to do so, then consider designing from scratch a
+Morph.
 
-Rename @label{Chapter 1} to your taste, @command{@@node} name should follow chapter name.
+Designing from scratch a Morph requires to deal with its appearance
+and the handling of the input events; for the former, Cuis offers a
+vector graphics anti-aliased canvas, the latter is done with a
+mechanism to filter and to handle mouse and keyboard events occurring
+in the scope of the custom Morph.
 
-@cindex editing @subentry menu
-In the menu block below report the @command{@@node}/@command{@@section} argument declared in the rest of this document.
+Let's start right away with a design from scratch.
 
 @menu
-* Preparation::
-* A few tips on editing::
+* A first glimpse::
+* Mouse event::
+* Keyboard event::
 @end menu
 
-@node Preparation
-@section Preparation
+@node A first glimpse
+@section A first glimpse
+It's easy to create custom morphs. Just create a subclass of an
+existing morph class. Then implement the @method{drawOn:} method or
+add and layout sub morphs.
 
-@subsection Copying template
-To edit your own booklet, you first copy the existing template:
+Let's make an example that draws an ellipse. Making it a subclass of
+@class{BoxMorph} gives it an @smalltalk{extent} instance variable
+which specifies its width and height.
 
-@smalltalkExampleCaption{Install your own booklet,copyingTemplate,
-cp -rf bookletTemplate myBooklet}
+@smalltalkExample{BoxMorph subclass: #EllipseDemo
+   instanceVariableNames: ''
+   classVariableNames: ''
+   poolDictionaries: ''
+   category: 'ArtOfMorph'}
 
-@subsection Settings
-In the master document @file{booklet.texinfo}, you should edit:
+We adjust its default extent@footnote{Observe the backtricks to
+improve performance at execution.},
 
-@enumerate
- @item The title and subtitle,
- @item The slogan.
- @item Insert an @command{@@include} command for each chapter.
-@end enumerate
+@smalltalkMethod{defaultExtent,
+@return{} `200@@200`}
 
-In the @file{misc/settings.texinfo} file adjust:
+In our @class{EllipseDemo}, the @smalltalk{extent} represents the
+lengths of the ox and oy axis of the ellipse. We use it to draw it
+accordingly:
 
-@itemize
- @item The title of the booklet, again,
- @item The list of writers in the @command{@@writer} macro,
- @item The list of reviewers in the @command{@@thanks} macro,
- @item Read the content of the file to learn about the macro to use when editing the booklet. You can also learn from the source ``The Cuis Book''.
-@end itemize
+@smalltalkMethod{drawOn: aCanvas,
+| radius |
+radius := extent / 2.0.
+aCanvas fillColor: Color purple do: [
+   aCanvas ellipseCenter: radius radius: radius]}
+   
+Finally, we instruct @cuis{} we want to use the Vector Graphic engine
+
+@smalltalkMethod{requiresVectorCanvas,
+@return{} true}
+
+@strong{Important.} The drawing always operates in the own morph
+coordinates system and we have to ensure our drawing operations remain
+in the bond defined by the morph origin, in the top-left corner, and
+its bottom-right corner delimited by its @smalltalk{extent} attribute,
+a point.
+
+@figure{Ellipse with axes,ch01-EllipseDemo-Axes,5}
 
 
-@node A few tips on editing
-@section A few tips on editing
-A subsection divides a section in smaller parts.
+@node Mouse event
+@section Mouse event
 
-@cindex editing @subentry figure
-Pictures must be copied in each @file{Chapter-XX/img} folder and be prefixed with the chapter number to avoid collision on html output.
-
-Then to insert an image, use the @command{@@figure} macro with three arguments: @emph{caption}, @emph{filename} without extension and @emph{width} expressed in centimeter:
-@code{@@figure@{Cuis, ch00-img1, 8@}}.
-
-@c @figure{Cuis, ch01-img1, 8}
-
-@exercise{Solution of the exercises,exeSolution, @emph{In which file must be authored the solutions of the exercises?}} 
+@node Keyboard event
+@section Keyboard event

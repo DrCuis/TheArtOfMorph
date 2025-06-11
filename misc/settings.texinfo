@@ -33,7 +33,7 @@ Cuis-Smalltalk
 
 @macro thanks
 @c Alphabetical list of reviewers
-Thanks to ... to share his examples and chapter on layout.
+Thanks to Mark Volkmann to share his examples.
 @*
 Thanks to ... for the reviews of the booklet, suggestions and borrowed
 texts. Your help is very valuable.
