@@ -72,17 +72,151 @@ Finally, we instruct @cuis{} we want to use the Vector Graphic engine
 @smalltalkMethod{requiresVectorCanvas,
 @return{} true}
 
-@strong{Important.} The drawing always operates in the own morph
+To display an instance of @class{EllipseDemo}, open a Workspace and
+execute @smalltalk{EllipseDemo new openInWorld}.
+
+@figure{Ellipse with axes@comma{} resized to an extent approximatively
+equals to 300@@100,ch01-EllipseDemo-Axes,5}
+
+@cuisNote{The drawing always operates in the own morph
 coordinates system and we have to ensure our drawing operations remain
 in the bond defined by the morph origin, in the top-left corner, and
 its bottom-right corner delimited by its @smalltalk{extent} attribute,
-a point.
+a point.}
 
-@figure{Ellipse with axes,ch01-EllipseDemo-Axes,5}
+Before proceeding forward with events, we may want to add semantic to
+our protocol with @msg{center} and @msg{radius} messages to use within
+the @method{drawOn:} method:
 
+@smalltalkMethod{center,
+@return{} extent / 2.0}
+
+@smalltalkMethod{semiAxises,
+" the semi minor and major axis of the ellipse"
+@return{} extent / 2.0}
+
+@smalltalkMethod{drawOn: aCanvas,
+aCanvas fillColor: Color purple do: [
+   aCanvas ellipseCenter: self center radius: self semiAxises ]}
 
 @node Mouse event
 @section Mouse event
+Let's explore how custom morphs can react to mouse clicks, mouse
+hovers, and keystrokes.
+
+@subsection Mouse click
+Here is a modification of our previous example whose color toggles
+between red and green each time it is clicked.
+
+As we need a color, we first modify our @class{EllipseDemo} to be a subclass of
+@class{ColoredBoxMorph}:
+
+@smalltalkExample{ColoredBoxMorph subclass: #EllipseDemo
+   instanceVariableNames: ''
+   classVariableNames: ''
+   poolDictionaries: ''
+   category: 'ArtOfMorph'}
+
+then we initialize it with the red color,
+
+@smalltalkMethod{initialize,
+super initialize.
+color := Color red}
+
+we request to handle the mouse click down event,
+
+@smalltalkMethod{handlesMouseDown: aMouseEvent,
+"This enables the morph to handle mouse events such as button presses."
+@return{} true}
+
+and at each mouse click, we toggle the @smalltalk{color} attribute
+between red and greed,
+
+@smalltalkMethod{mouseButton1Down: aMouseEvent localPosition: aPosition,
+color := (color = `Color red`) ifTrue: [`Color green`] ifFalse: [`Color red`].
+self redrawNeeded}
+
+of course we adjust the drawing method to use the @smalltalk{color} attribute,
+
+@smalltalkMethod{drawOn: aCanvas,
+aCanvas fillColor: color do: [
+   aCanvas ellipseCenter: self center radius: self semiAxises ]}
+
+To render this, open a Workspace and evaluate @smalltalk{EllipseDemo
+new openInWorld}. Click the circle several times to toggle its color.
+
+@subsection Mouse hovering
+
+Now let's modify our @class{EllipseDemo} to toggle its color based on
+whether the mouse cursor is hovering over it.
+
+This time, we want to handle event when the mouse pointer is hovering
+our @class{EllipseMorph}:
+
+@smalltalkMethod{handlesMouseOver: aMouseEvent,
+"This enables the morph to handle mouse enter and leave events."
+@return{} true}
+
+of course we remove the @smalltalk{handlesMouseDown:} method, or
+alternatively we edit it so it return @smalltalk{false}, to let
+@cuis{} handles this event
+
+@smalltalkMethod{handlesMouseDown: aMouseEvent,
+"This enables the morph to handle mouse events such as button presses."
+@return{} false}
+
+There are two event handlers associated when handling mouse over: when
+entering and when leaving a morph. We edit the methods accordingly to
+toggle the morph color:
+
+@smalltalkMethod{mouseEnter: aMouseEvent,
+color := `Color green`.
+self redrawNeeded}
+
+@smalltalkMethod{mouseLeave: aMouseEvent,
+color := `Color red`.
+self redrawNeeded}
+
+Create an instance as seen previously, the hover onto and off of the
+ellipse to toggle its color.
+
+Observe how the frontier between inside and outside of the ellipse is
+a rectangle, this is because our @class{EllipseDemo} is a kind of
+@class{BoxMorph} optimised for rectangular shape. To have exact pixel
+detection, including shape drawn with holes, our @class{EllipseDemo}
+would require to be a direct subclass of @class{PlacedMorph}. In the
+process, we will lose the @smalltalk{extent} and @smalltalk{color}
+attributes, and we will have to define ones of our own.
+
+@subsection Grow on user request
+Now let's combine the mouse hover and mouse click events: at button 1
+click, the ellipse shrinks slightly; at button 2 click, it grows
+greatly.
+
+To do so we introduce a @smalltalk{shrink} attribute initialized to 0:
+
+@smalltalkMethod{initialize,
+super initialize.
+color := Color red.
+shrink := 0}
+
+Then it changes depending on user actions, its value increase slightly
+at button 1 click,
+
+@smalltalkMethod{mouseButton1Down: aMouseEvent localPosition: aPosition,
+shrink := (shrink + 0.5) min: (extent x min: extent y) // 2.
+self redrawNeeded}
+
+and decrease quickly at button 2 click,
+
+@smalltalkMethod{mouseButton2Down: aMouseEvent localPosition: aPosition,
+shrink := (shrink - 5) max: 0.
+self redrawNeeded}
+
+then we adjust our @method{semiAxies} method used to draw the ellipse,
+
+@smalltalkMethod{semiAxises,
+@return{}  (extent / 2.0) - shrink}
 
 @node Keyboard event
 @section Keyboard event
