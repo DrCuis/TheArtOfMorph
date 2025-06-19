@@ -213,7 +213,10 @@ and decrease quickly at button 2 click,
 shrink := (shrink - 5) max: 0.
 self redrawNeeded}
 
-then we adjust our @method{semiAxies} method used to draw the ellipse,
+Of course we have to bound the @smalltalk{shrink} attribute between 0
+and the smaller extent axis of the whole morph.
+
+Then we adjust our @method{semiAxies} method used to draw the ellipse,
 
 @smalltalkMethod{semiAxises,
 @return{}  (extent / 2.0) - shrink}
