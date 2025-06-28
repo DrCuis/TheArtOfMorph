@@ -260,8 +260,42 @@ To know what is the preference in your @cuis{} system, execute the code:
 @result{} true}
 
 I personally prefer to explicitly inform the @cuis{} system where the
-keyboard focus should go. Indeed my mouse tends to slip on my desk,
-resulting on the keyboard focus change resulting on annoyance:
+keyboard focus should go. Indeed, my mouse tends to slip on my desk,
+resulting on the keyboard focus to change annoyingly:
 
 @smalltalkExample{Preferences at: #focusFollowsMouse put: false}
 
+Our @class{EllipseDemo} honors this  preference when the mouse pointer
+enter the morph:
+
+@smalltalkMethod{mouseEnter: aMouseEvent,
+color := `Color green`.
+"If the user opted for focus to automatically
+move focus to the morph under the cursor then tell
+the cursor (event hand) to give focus to this morph."
+(Preferences at: #focusFollowsMouse) ifTrue: [aMouseEvent hand newKeyboardFocus: self].
+self redrawNeeded}
+
+The @emph{hand} is the mouse pointer object in the @cuis{}
+terminology. It manages the keyboard focus and it is informed when the
+focus should be affected to another morph.
+
+When the mouse pointer leaves our morph we let its parent morph manages
+the focus:
+
+@smalltalkMethod{mouseLeave: aMouseEvent,
+super mouseLeave: aMouseEvent.
+color := `Color red`.
+self redrawNeeded}
+
+again accordingly to the preference:
+
+@smalltalkMethod{Morph>>mouseLeave: evt,
+"Handle a mouseLeave event@comma{} meaning the mouse just left my bounds with no button pressed.
+Note: a Morph must answer true to #handlesMouseOver: in order to receive this message."
+(Preferences at: #focusFollowsMouse) ifTrue: [evt hand releaseKeyboardFocus: self].
+
+"Allow instances to dynamically use properties for handling common events."
+self 
+   valueOfProperty: #mouseLeave: 
+   ifPresentDo: [ :handler | handler value: evt ]}

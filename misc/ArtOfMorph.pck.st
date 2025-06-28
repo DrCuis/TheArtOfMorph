@@ -1,6 +1,6 @@
-'From Cuis7.3 [latest update: #7248] on 19 June 2025 at 11:55:52 pm'!
+'From Cuis7.3 [latest update: #7248] on 28 June 2025 at 11:42:05 pm'!
 'Description '!
-!provides: 'ArtOfMorph' 1 1!
+!provides: 'ArtOfMorph' 1 2!
 SystemOrganization addCategory: #ArtOfMorph!
 
 
@@ -89,11 +89,11 @@ mouseEnter: aMouseEvent
     (Preferences at: #focusFollowsMouse) ifTrue: [aMouseEvent hand newKeyboardFocus: self].
     self redrawNeeded.! !
 
-!EllipseDemo methodsFor: 'events' stamp: 'hlsf 6/19/2025 23:53:47'!
+!EllipseDemo methodsFor: 'events' stamp: 'hlsf 6/28/2025 09:36:28'!
 mouseLeave: aMouseEvent
-    color := `Color red`.
-	aMouseEvent hand releaseKeyboardFocus: self.
-    self redrawNeeded.! !
+	super mouseLeave: aMouseEvent.
+	color := `Color red`.
+	self redrawNeeded.! !
 
 !EllipseDemo methodsFor: 'events' stamp: 'hlsf 6/14/2025 13:09:40'!
 wantsContour 
