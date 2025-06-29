@@ -288,14 +288,71 @@ super mouseLeave: aMouseEvent.
 color := `Color red`.
 self redrawNeeded}
 
-again accordingly to the preference:
+accordingly to the @smalltalk{#focusFollowsMouse} system preference:
 
 @smalltalkMethod{Morph>>mouseLeave: evt,
-"Handle a mouseLeave event@comma{} meaning the mouse just left my bounds with no button pressed.
-Note: a Morph must answer true to #handlesMouseOver: in order to receive this message."
-(Preferences at: #focusFollowsMouse) ifTrue: [evt hand releaseKeyboardFocus: self].
+(Preferences at: #focusFollowsMouse)
+   ifTrue: [evt hand releaseKeyboardFocus: self].
+../..}
 
-"Allow instances to dynamically use properties for handling common events."
-self 
-   valueOfProperty: #mouseLeave: 
-   ifPresentDo: [ :handler | handler value: evt ]}
+@cindex event @subentry keyboard @subentry key stroke
+
+To handle the keyboard strokes, we override the dedicated method
+@method{keyStroke:}. We first ensure the key stroke was not handled by
+the parent@footnote{For example, to manage keyboard shortcut or
+tabulation.} then we do the handling specific to our
+@class{EllipseDemo} morph:
+
+@smalltalkMethod{keyStroke: aKeyEvent,
+| character |
+super keyStroke: aKeyEvent.
+aKeyEvent wasHandled ifTrue: [@return{} self].
+character := Character codePoint: aKeyEvent keyValue.
+color := character 
+   caseOf: @{
+      [ $r ] -> [ `Color red` ].
+      [ $g ] -> [ `Color green` ].
+      [ $b ] -> [ `Color blue` ] @}
+   otherwise: [color].
+self redrawNeeded}
+
+
+@cindex event @subentry keyboard @subentry modifier keys
+
+The event object is interrogated with dedicated messages to detect
+modifier keys (i.e. @msg{controlKeyPressed}). Browse the
+@class{UserInputEvent} class to discover them all.
+
+To have more flexibility on the color used in our ellipse demo, let's
+implement the following features:
+
+@itemize
+@item
+Pressing @kbd{h}, @kbd{s} or @kbd{v} increase, respectively, the hue,
+the saturation and the brightness of the ellipse color.
+
+@item
+Pressing @kbd{Ctrl-h}, @kbd{Ctrl-s} or @kbd{Ctrl-v} decrease these same values.
+@end itemize
+
+@smalltalkMethod{keyStroke: aKeyEvent,
+| character increment h s v |
+../..
+h := color hue.
+s := color saturation.
+v := color brightness .
+increment := aKeyEvent controlKeyPressed ifTrue: [-0.1] ifFalse: [0.1].
+character 
+   caseOf: @{
+      [ $h ] -> [ h := h + (increment * 13) ].
+      [ $s ] -> [ s := s + increment ].
+      [ $v ] -> [ v := v + increment ] @} 
+   otherwise: [].
+color setHue: h saturation: s brightness: v.
+self redrawNeeded}
+
+Our gentle introduction ends here, we have exposed several facets of
+the Morph system to build from scratch your own morph: drawing of the
+morph and handling of the mouse and keyboard input. In the following
+chapters we explore more in detail the design from scratch of your own
+morphs and how to combine them with existing morph.
