@@ -1,6 +1,6 @@
-'From Cuis7.3 [latest update: #7248] on 28 June 2025 at 11:42:05 pm'!
+'From Cuis7.3 [latest update: #7248] on 29 June 2025 at 11:09:27 pm'!
 'Description '!
-!provides: 'ArtOfMorph' 1 2!
+!provides: 'ArtOfMorph' 1 3!
 SystemOrganization addCategory: #ArtOfMorph!
 
 
@@ -57,17 +57,32 @@ handlesMouseOver: aMouseEvent
 "This enables the morph to handle mouse enter and leave events."
     ^ true! !
 
-!EllipseDemo methodsFor: 'events' stamp: 'hlsf 6/19/2025 23:55:45'!
+!EllipseDemo methodsFor: 'events' stamp: 'hlsf 6/29/2025 12:10:49'!
 keyStroke: aKeyEvent
-    | character |
-
-    character := Character codePoint: aKeyEvent keyValue.
-    color := character caseOf: {
-        [ $r ] -> [ `Color red` ].
-        [ $g ] -> [ `Color green` ].
-        [ $b ] -> [ `Color blue` ]
-    }.
-    self redrawNeeded.! !
+	| character increment h s v |
+	super keyStroke: aKeyEvent.
+	aKeyEvent wasHandled ifTrue: [^ self].
+	character := Character codePoint: aKeyEvent keyValue.
+	color := character 
+		caseOf: {
+			[ $r ] -> [ `Color red` ].
+			[ $g ] -> [ `Color green` ].
+			[ $b ] -> [ `Color blue` ] }
+		otherwise: [color].
+	
+	h := color hue.
+	s := color saturation.
+	v := color brightness .
+	increment := aKeyEvent controlKeyPressed ifTrue: [-0.1] ifFalse: [0.1].
+	character 
+		caseOf:   {
+			[ $h ] -> [ h := h + (increment * 13) ].
+			[ $s ] -> [ s := s + increment ].
+			[ $v ] -> [ v := v + increment ]
+		} 
+		otherwise: [].
+	color setHue: h saturation: s brightness: v.
+	self redrawNeeded! !
 
 !EllipseDemo methodsFor: 'events' stamp: 'hlsf 6/19/2025 23:52:50'!
 mouseButton1Down: aMouseEvent localPosition: aPosition
