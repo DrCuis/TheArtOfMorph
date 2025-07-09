@@ -1,0 +1,8 @@
+@node Design Morph from scratch
+@chapter Design Morph from scratch
+
+When you imagine an unconventional way to interact with the computer,
+it may indicate you are on the verge to design new morphs from
+scratch: a new way to present information or/and to interact with.
+
+This chapter will help you in that circumstances.

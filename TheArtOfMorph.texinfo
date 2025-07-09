@@ -47,6 +47,8 @@ Deep inside Morph
 @c Chapters
 @c=====================================
 @include chapter-01/contents.texinfo
+@include chapter-02/contents.texinfo
+@include chapter-03/contents.texinfo
 @c=====================================
 @c Apprendices
 @c=====================================
