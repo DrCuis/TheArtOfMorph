@@ -66,6 +66,14 @@ Deep inside Morph
 @node The Figures
 @appendix The Figures
 @listoffloats Figure
+@c The source code package
+@node Art of Morph package
+@appendix Art of Morph package
+Download @url{https://github.com/DrCuis/TheArtOfMorph/blob/main/misc/ArtOfMorph.pck.st,Art of Morph package}
+@smallformat
+@verbatiminclude misc/ArtOfMorph-untabbed.pck.st
+@end smallformat
+
 @c Indexes
 @node Indexes
 @appendix Conceptual index
