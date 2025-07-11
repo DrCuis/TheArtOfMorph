@@ -4,7 +4,7 @@ htmlDest="html"
 infoDest="info"
 docbookDest="docbook"
 masterDoc="TheArtOfMorph.texinfo"
-chapNumbers="01 50"
+chapNumbers="01 02 03 50"
 
 function collateChaptersImg {
     chapters=""

@@ -1,6 +1,8 @@
 @node Design Morph by reuse
 @chapter Design Morph by reuse
 
+@*
+
 In this chapter you will learn how to design new morph by assembling
 existing ones. This chapter will be very familliar with the booklet
 @emph{Design GUI with Morph}, and it is a good idea to read its
@@ -9,3 +11,39 @@ components,https://DrCuis.github.io/DesignGUI/Layout-components.html}
 chapter before.
 
 
+@node From where to start?
+@section From where to start?
+
+Design by reuse indeed, but from where to start? Which classes should
+we make reuse from? As often, the @cuis{} system may be our best
+guide, let's interrogate it to learn which morph has more subclasses.
+
+We collect, for each existing morph in the @cuis{} system, the
+quantity of subclasses, then we sort the result.
+
+@smalltalkExample{| hallOfFame |
+hallOfFame @assign{} Morph allSubclasses collect: [:each |
+   Array with: each with: each subclasses size].
+hallOfFame @assign{} hallOfFame sort: [:array1 :array2 | array1 second > array2 second]}
+
+@figure{The hall of fame of morph subclasses count,ch02-hallOfFame,5}
+
+Let's analyze the top ranked morphs:
+
+@enumerate
+@item @class{PlacedMorph}. Its subclasses need to override the @method{drawOn:} method. So not a candidate design morph by reuse
+
+@item @class{BorderedMorph}, @class{ColoredBoxMorph} and @class{BoxMorph}. Those classes are @class{PlacedMorph} with a few additional characteristics. Subclassing these classes will requite most of the time overriding the @method{drawOn:} method.
+
+@item @class{LayoutMorph}. It has 13 subclasses. It is designed to assemble morphs in a new morph, using this class for reuse makes perfectly sense and we already know how to use it.
+
+@item @class{PluggableMorph}. It seems very generic, may be a good candidate. It represents a a view of an associated model, likely subclass need a specific @method{drawOn:} method.
+
+@item @class{PluggableScrollPane}.
+
+@end enumerate
+
+
+
+@node Scroll pane
+@section Scroll pane
