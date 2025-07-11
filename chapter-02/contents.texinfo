@@ -1,7 +1,11 @@
 @node Design Morph by reuse
 @chapter Design Morph by reuse
 
-In this chapter you will learn how to design new morph by assembly
+In this chapter you will learn how to design new morph by assembling
 existing ones. This chapter will be very familliar with the booklet
-@emph{Design GUI with Morph}, and it is a good idea to read this one
-before.
+@emph{Design GUI with Morph}, and it is a good idea to read its
+@url{Layout
+components,https://DrCuis.github.io/DesignGUI/Layout-components.html}
+chapter before.
+
+
