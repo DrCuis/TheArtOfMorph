@@ -3,10 +3,10 @@
 
 @*
 
-In this chapter you will learn how to design new morph by assembling
-existing ones. This chapter will be very familliar with the booklet
-@emph{Design GUI with Morph}, and it is a good idea to read its
-@url{Layout
+In this chapter you will learn how to design new morph -- in the idea
+of a new widget -- by assembling existing ones. This chapter will be
+very familliar with the booklet @emph{Design GUI with Morph}, and it
+is a good idea to read its @url{Layout
 components,https://DrCuis.github.io/DesignGUI/Layout-components.html}
 chapter before.
 
@@ -26,22 +26,62 @@ hallOfFame @assign{} Morph allSubclasses collect: [:each |
    Array with: each with: each subclasses size].
 hallOfFame @assign{} hallOfFame sort: [:array1 :array2 | array1 second > array2 second]}
 
-@figure{The hall of fame of morph subclasses count,ch02-hallOfFame,5}
+@figure{The hall of fame of morph subclasses count,ch02-hallOfFame,6}
 
-Let's analyze the top ranked morphs:
+Let's analyze some top ranked morphs:
 
 @enumerate
-@item @class{PlacedMorph}. Its subclasses need to override the @method{drawOn:} method. So not a candidate design morph by reuse
+@item
+@class{PlacedMorph}. Its subclasses need to override the
+@method{drawOn:} method. So not a candidate to design morph by reuse.
 
-@item @class{BorderedMorph}, @class{ColoredBoxMorph} and @class{BoxMorph}. Those classes are @class{PlacedMorph} with a few additional characteristics. Subclassing these classes will requite most of the time overriding the @method{drawOn:} method.
+@item
+@class{BorderedMorph}, @class{ColoredBoxMorph} and
+@class{BoxMorph}. Those classes are @class{PlacedMorph} with a few
+additional characteristics. Subclassing these classes will require
+most of the time overriding the @method{drawOn:} method.
 
-@item @class{LayoutMorph}. It has 13 subclasses. It is designed to assemble morphs in a new morph, using this class for reuse makes perfectly sense and we already know how to use it.
+@item
+@class{LayoutMorph}. It has 11 subclasses. It is designed to assemble
+morphs in a new morph, using this class for reuse makes perfectly
+sense and we already know how to use it.
 
-@item @class{PluggableMorph}. It seems very generic, may be a good candidate. It represents a a view of an associated model, likely subclass need a specific @method{drawOn:} method.
+@item
+@class{SystemWindow}. As a view representing a whole application,
+subclassing it makes sense to implement specific behaviors of one GUI
+application, but not as a morph you can reuse as a widget. 
 
-@item @class{PluggableScrollPane}.
+@item
+@class{PluggableMorph}. It seems very generic, may be a good
+candidate. It represents a view of an associated model, however its
+subclasses need to implement a specific @method{drawOn:} method. We
+may want to use it when designing a morph from scratch.
+
+@item
+@class{PluggableScrollPane}.
+
+This morph encapsulates an arbitrary morph -- called a @emph{scroller}
+-- in a pane with optional scrollbars when the scroller extent is too
+large. It is very handy, and in some circumstances it makes sense to
+subclass it.
 
 @end enumerate
+
+All in all, we have two candidates to subclass when conceiving a morph
+by reuse: @class{LayoutMorph} and @class{PluggableScrollPane}.
+
+
+@node Layout
+@section Layout
+
+Arranging a set of morphs is what does the @class{LayoutMorph} class,
+therefore it makes sense to define a new morph based on layout then to
+install a set of morphs into. This is exactly what does the
+@class{LabelGroup} class.
+
+This subclass of @class{LayoutMorph} takes a collection of textual
+descriptions and morphs to arrange them in two columns of labels and
+morphs. This idea is to give a label to morphs presented in a panel.
 
 
 
