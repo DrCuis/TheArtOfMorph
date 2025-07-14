@@ -77,13 +77,74 @@ by reuse: @class{LayoutMorph} and @class{PluggableScrollPane}.
 Arranging a set of morphs is what does the @class{LayoutMorph} class,
 therefore it makes sense to define a new morph based on layout then to
 install a set of morphs into. This is exactly what does the
-@class{LabelGroup} class.
+@class{LabelGroup} class of the @label{Cuis-Smalltalk-UI} package.
+
+@subsection Arrange visually
 
 This subclass of @class{LayoutMorph} takes a collection of textual
 descriptions and morphs to arrange them in two columns of labels and
-morphs. This idea is to give a label to morphs presented in a panel.
+morphs. The idea is to give a label to widgets presented in a view.
 
+@figure{A group of three morphs@comma{} each with its own
+label,ch02-labelGroup,9}
 
+In one layout column, the label group arranges nicely each label and
+widget couple in a row so that all the label cells are of same
+width. What it takes is a collection of label and morph
+associations. The returned layout is to be added in a higher level
+view.
+
+@smalltalkMethod{LabelGroup class>>example1,
+@return{} self with: @{
+   'Name' -> (LabelMorph contents: 'send $25 for your name here').
+   'Description which is very long...' -> (
+      TextModelMorph withText: '' :: emptyTextDisplayMessage: 'Why Smalltalk?').
+   'Smalltalk variants' -> (
+      PluggableListMorph
+         withModel: (ListModel with: #('Cuis-Smalltalk' 'Pharo' 'Squeak' 'Amber')) 
+         listGetter: #list 
+         indexGetter: #listIndex 
+         indexSetter: #listIndex: ) @} ::
+   color: Color white paler ;
+   yourself}
+
+The @class{LabelGroup} is a passive object, its only purpose is to
+arrange visually morphs: all the user interactions are managed by the
+widgets. However, in some circumstance, we want both to arrange
+widgets and be notified about specific user interactions. This is what
+does the @class{CheckGroup} and @class{RadioGroup} classes.
+
+@subsection Be notified
+As in @class{LabelGroup}, a @class{CheckGroup} presents a collection
+of labels with associated widgets, here @class{CheckButtonMorph}.
+
+In a @class{CheckGroup}, zero or more @class{CheckButtonMorph} can be
+selected at once, contrary to a @class{RadioGroup} where only one
+@class{RadioButtonMorph} is selected at once.
+
+@figure{A check group to select among the baby squeaks,ch02-checkGroup,3}
+
+Creating a check group only requires a collection of labels, or morphs:
+
+@smalltalkMethod{CheckGroup class>>example1,
+| group |
+group := self fromList: #('Cuis-Smalltalk' 'Pharo' 'Squeak').
+group buttons do: [:each | 
+   each when: #checkSelection send: #show: to: Transcript].
+@return{} group}
+
+In the example, the @smalltalk{#checkSelection} event emitted by each
+check button is captured for report purpose. The attentive reader will
+observe this event is not specific to the check group. Indeed, the
+check group itself emits another specific event
+@smalltalk{#informCheckSelection} when a button is selected:
+
+@smalltalkMethod{CheckGroup>>newSelection: radioButton,
+" Inform we have a new selection "
+self triggerEvent: #informCheckSelection with: (self symbolForButton: radioButton)}
+	
+The event is triggered with the button label as attribute. To observe
+its use, read the method @smalltalk{CheckGroup class>>example2}.
 
 @node Scroll pane
 @section Scroll pane
