@@ -11,6 +11,14 @@ components,https://DrCuis.github.io/DesignGUI/Layout-components.html}
 chapter before.
 
 
+@menu
+* From where to start?::
+* Layout::
+* Scroll pane::
+@end menu
+
+
+
 @node From where to start?
 @section From where to start?
 
@@ -58,12 +66,10 @@ subclasses need to implement a specific @method{drawOn:} method. We
 may want to use it when designing a morph from scratch.
 
 @item
-@class{PluggableScrollPane}.
-
-This morph encapsulates an arbitrary morph -- called a @emph{scroller}
--- in a pane with optional scrollbars when the scroller extent is too
-large. It is very handy, and in some circumstances it makes sense to
-subclass it.
+@class{PluggableScrollPane}. This morph encapsulates an arbitrary
+morph -- called a @emph{scroller} -- in a pane with optional
+scrollbars when the scroller extent is too large. It is very handy,
+and in some circumstances it makes sense to subclass it.
 
 @end enumerate
 
@@ -124,7 +130,9 @@ selected at once, contrary to a @class{RadioGroup} where only one
 
 @figure{A check group to select among the baby squeaks,ch02-checkGroup,3}
 
-Creating a check group only requires a collection of labels, or morphs:
+Creating a check group only requires a collection of
+labels@footnote{As an alternative to textual label, arbitrary morphs
+can be used instead.}:
 
 @smalltalkMethod{CheckGroup class>>example1,
 | group |
@@ -144,7 +152,61 @@ check group itself emits another specific event
 self triggerEvent: #informCheckSelection with: (self symbolForButton: radioButton)}
 	
 The event is triggered with the button label as attribute. To observe
-its use, read the method @smalltalk{CheckGroup class>>example2}.
+its use, experiment with the method @smalltalk{CheckGroup
+class>>example2}.
 
 @node Scroll pane
 @section Scroll pane
+@c Present use case
+Compare to the @class{LayoutMorph} class, the
+@class{PluggableScrollPane} class doesn't have much subclasses. We
+found ones for all sort of list of items or text editor with need to
+scroll contents.
+
+This class doesn't need to be subclassed to be useful, each time you
+want to present a morph of a large extent, try to use it:
+
+@smalltalkExampleCaption{Bezier curves on a scroller, bezierScroller,
+PluggableScrollPane new ::
+   scroller: Sample02Bezier new;
+   color: Color white;
+   openInWorld}
+
+Among its few subclasses, @class{FlowLayoutMorph} extends the behavior
+of the layout morph, but doesn't inherit from, to present a collection
+of morphs in a strip spanning in several rows. It is flanked with a vertical
+scroll bar, if needed.
+
+Its use is simple:
+
+@smalltalkMethod{FlowLayoutMoprh class>>example1,
+| flow cells |
+flow := self new openInWorld.
+cells := OrderedCollection new.
+50 timesRepeat: [ cells add: (
+   ColoredBoxMorph new :: 
+      morphExtent: (5 to: 80) atRandom asPoint;
+      color: Color random)].
+flow cells: cells}
+
+When resizing the morph, particularly its width, the flow of morphs is
+updated simultaneously.
+
+@figure{Flow of box of various sizes,ch02-flowLayoutMorph,6}
+
+@c Write a folder viewer morph, should react to event when entering a new folder
+@c or double clicking on a file, etc
+
+
+@node File Selector
+@section File Selector
+@c Based on previous sections, write this new file selector morph
+
+So far we have observed existing morphs found in @cuis{}
+repositories. Let's now build our own new morph.
+
+We suggest to design a file selector morph: its purpose is to let the
+user to browse among the folders of the host, then to select a file or
+a folder of choice.
+
+@figure{A sketch depicting a file selector and its behavior,ch02-fileSelectorSketch,10}
