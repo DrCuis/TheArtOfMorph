@@ -1,6 +1,6 @@
-'From Cuis7.3 [latest update: #7248] on 29 June 2025 at 11:09:27 pm'!
+'From Cuis7.5 [latest update: #7345] on 19 July 2025 at 1:38:58 pm'!
 'Description '!
-!provides: 'ArtOfMorph' 1 3!
+!provides: 'ArtOfMorph' 1 4!
 SystemOrganization addCategory: #ArtOfMorph!
 
 
@@ -12,6 +12,16 @@ ColoredBoxMorph subclass: #EllipseDemo
 	category: 'ArtOfMorph'!
 !classDefinition: 'EllipseDemo class' category: #ArtOfMorph!
 EllipseDemo class
+	instanceVariableNames: ''!
+
+!classDefinition: #FileSelectorPane category: #ArtOfMorph!
+FlowLayoutMorph subclass: #FileSelectorPane
+	instanceVariableNames: 'current'
+	classVariableNames: ''
+	poolDictionaries: ''
+	category: 'ArtOfMorph'!
+!classDefinition: 'FileSelectorPane class' category: #ArtOfMorph!
+FileSelectorPane class
 	instanceVariableNames: ''!
 
 
@@ -117,3 +127,44 @@ wantsContour
 !EllipseDemo methodsFor: 'geometry testing' stamp: 'hlsf 6/11/2025 19:05:04'!
 requiresVectorCanvas
 	^ true ! !
+
+!FileSelectorPane methodsFor: 'initialization' stamp: 'hlsf 7/19/2025 13:26:16'!
+initialize
+	super initialize.
+	self open: DirectoryEntry userBaseDirectory
+	! !
+
+!FileSelectorPane methodsFor: 'private' stamp: 'hlsf 7/19/2025 13:30:42'!
+entryPreviewFor: fileEntry
+	| fileView |
+	fileView := FilePreviewMorph 
+		object: fileEntry 
+		image: ((fileEntry isFileEntry 
+			ifTrue: [Theme current genericTextIcon] 
+			ifFalse: [Theme current fetch: #( '16x16' 'places' 'folder' )]) magnifyTo: 48@48)
+		buttons: nil
+		label: fileEntry baseName ::
+		borderColor: Color transparent;
+		color: Color transparent.
+	fileEntry isDirectoryEntry ifTrue: [
+		fileView when: #doubleClick send: #open: to: self with: fileEntry].
+	^ fileView ! !
+
+!FileSelectorPane methodsFor: 'private' stamp: 'hlsf 7/19/2025 11:57:59'!
+previewsFor: entries
+	^ (entries sort: [:a :b | a baseName asUppercase < b baseName asUppercase ]) collect: [:anEntry | 
+		self entryPreviewFor: anEntry]! !
+
+!FileSelectorPane methodsFor: 'accessing' stamp: 'hlsf 7/19/2025 12:40:15'!
+open: aDirectoryEntry
+	| entryViews |
+	model := aDirectoryEntry.
+	entryViews := OrderedCollection new.
+	model isRoot ifFalse: [ | parentView |
+		parentView := self entryPreviewFor: model parent.
+		parentView relabel: '..' bold.
+		entryViews add: parentView].
+	entryViews 
+		addAll: (self previewsFor: model directories);
+		addAll: (self previewsFor: model files ).
+	self cells: entryViews ! !
