@@ -230,13 +230,60 @@ Of course at this stage, we can't browse in the directories tree:
 @figure{A basic tool to list the files in a folder,ch02-fileSelectorBasic,7}
 
 To add more behavior to our poor man file selector, we want to
-subclass it from @class{FlowLayoutMorph}.
+subclass it from @class{FlowLayoutMorph}:
 
 @smalltalkExample{FlowLayoutMorph subclass: #FileSelectorPane
-   instanceVariableNames: 'directory'
+   instanceVariableNames: ''
    classVariableNames: ''
    poolDictionaries: ''
    category: 'ArtOfMorph'}
+
+In its parents hierarchy, our @class{FileSelectorPane} has the
+@class{PluggableMorph} has ancestor, this one is observing a
+@smalltalk{model}. In our present context, the @smalltalk{model}
+represents the currently observed @class{DirectoryEntry}.
+
+The default location is set to the user base directory
+
+@smalltalkMethod{initialize,
+super initialize.
+self open: DirectoryEntry userBaseDirectory}
+
+When opening a new location, directories and files are collected and
+sorted in two groups to build meaning full views,
+
+@smalltalkMethod{open: aDirectoryEntry,
+| entryViews |
+model := aDirectoryEntry.
+entryViews := OrderedCollection new.
+model isRoot ifFalse: [ | parentView |
+   parentView := self entryPreviewFor: model parent.
+   parentView relabel: '..' bold.
+   entryViews add: parentView].
+entryViews 
+   addAll: (self previewsFor: model directories);
+   addAll: (self previewsFor: model files ).
+self cells: entryViews}
+
+
+The special directory ``@strong{..}'' in inserted first to browse to
+the parent directory of the model. Observe how each directory preview is
+set to respond to the double click event:
+
+@smalltalkMethod{entryPreviewFor: fileEntry,
+| fileView |
+fileView := FilePreviewMorph 
+   object: fileEntry 
+   image: ((fileEntry isFileEntry 
+      ifTrue: [Theme current genericTextIcon] 
+      ifFalse: [Theme current fetch: #( '16x16' 'places' 'folder' )]) magnifyTo: 48@@48)
+   buttons: nil
+   label: fileEntry baseName ::
+   borderColor: Color transparent;
+   color: Color transparent.
+fileEntry isDirectoryEntry ifTrue: [
+   fileView when: #doubleClick send: #open: to: self with: fileEntry].
+@return{} fileView }
 
 
 @node File Selector
