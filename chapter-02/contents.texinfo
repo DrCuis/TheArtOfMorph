@@ -239,18 +239,17 @@ subclass it from @class{FlowLayoutMorph}:
    category: 'ArtOfMorph'}
 
 In its parents hierarchy, our @class{FileSelectorPane} has the
-@class{PluggableMorph} has ancestor, this one is observing a
+@class{PluggableMorph} ancestor, this one is observing a
 @smalltalk{model}. In our present context, the @smalltalk{model}
-represents the currently observed @class{DirectoryEntry}.
-
-The default location is set to the user base directory
+represents the currently observed @class{DirectoryEntry}. It is set by
+default to the user base directory:
 
 @smalltalkMethod{initialize,
 super initialize.
 self open: DirectoryEntry userBaseDirectory}
 
 When opening a new location, directories and files are collected and
-sorted in two groups to build meaning full views,
+sorted separatly, in two groups, to build meaning full pre-views,
 
 @smalltalkMethod{open: aDirectoryEntry,
 | entryViews |
@@ -265,10 +264,17 @@ entryViews
    addAll: (self previewsFor: model files ).
 self cells: entryViews}
 
+The directory and file entries are sorted appropriately and each one
+is flanked with a preview:
 
-The special directory ``@strong{..}'' in inserted first to browse to
-the parent directory of the model. Observe how each directory preview is
-set to respond to the double click event:
+@smalltalkMethod{previewsFor: entries,
+@return{} (entries sort: [:a :b | a baseName asUppercase < b baseName asUppercase ])
+      collect: [:anEntry | self entryPreviewFor: anEntry]}
+
+The special directory ``@strong{..}'' is inserted first to be able to
+browse to the parent directory of the @smalltalk{model}. Observe how
+each directory preview is listening to the double click event, in that
+circumstance the related directory is opened.
 
 @smalltalkMethod{entryPreviewFor: fileEntry,
 | fileView |
@@ -284,6 +290,10 @@ fileView := FilePreviewMorph
 fileEntry isDirectoryEntry ifTrue: [
    fileView when: #doubleClick send: #open: to: self with: fileEntry].
 @return{} fileView }
+
+To integrate this widget with other morph, particularly to behave as a
+file selector, we need it to trigger event when the browsed directory
+is changed. This is discussed in the next section.
 
 
 @node File Selector
