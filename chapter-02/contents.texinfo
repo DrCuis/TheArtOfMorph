@@ -246,13 +246,13 @@ To add more behavior to our poor man file selector, we want to make
 our first morph by reusing existing components.
 
 @cindex morph @subentry @class{FileSelectorPane}
-@subsection Our first morph design by reuse
-Our morph will present visually files and directories of a given
-location in the disk of the host. As we want this morph to be reused
-by other GUI designer, it doesn't present itself in a window but in a
-simple surface, a pane. Therefore we name it @class{FileSelectorPane},
-it emits event when the user selects a file. It updates itself with
-new contents when the user double-clicks on a folder.
+@subsection First morph design by reuse
+Our morph presents visually files and directories at a given location
+in the disk of the host. As we want this morph to be reused by other
+GUI designer, it doesn't present itself in a window but in a simple
+surface, a pane. Therefore we name it @class{FileSelectorPane}, it
+emits event when the user selects a file. It updates itself with new
+contents when the user double-clicks on a folder.
 
 Because we may have numerous files and directories to present, we
 create our @class{FileSelectorPane} as a subclass of
@@ -297,10 +297,14 @@ is flanked with a preview:
 @return{} (entries sort: [:a :b | a baseName asUppercase < b baseName asUppercase ])
       collect: [:anEntry | self entryPreviewFor: anEntry]}
 
-The special directory ``@strong{..}'' is inserted first to be able to
-browse to the parent directory of the @smalltalk{model}. Observe how
-each directory preview is listening to the double click event, in that
-circumstance the related directory is opened.
+The special directory ``@strong{..}'' above is inserted first for the
+user to browse to the parent directory of the @smalltalk{model}.
+
+@cindex morph @subentry @class{FilePreviewMorph}
+@cindex event @subentry listener
+@cindex event @subentry @msg{when:send:to:with:}
+Observe below how each directory preview is listening to the double
+click event, in that circumstance the related directory is opened.
 
 @smalltalkMethod{entryPreviewFor: fileEntry,
 | fileView |
@@ -317,11 +321,65 @@ fileEntry isDirectoryEntry ifTrue: [
    fileView when: #doubleClick send: #open: to: self with: fileEntry].
 @return{} fileView }
 
+We are relying on @class{FilePreviewMorph}, a composition of several
+morphs, itself emitting events to notify about user activities.
+ 
 To integrate this widget with other morph, particularly to behave as a
-file selector, we need it to trigger event when user select a
-file. This is discussed in the next section.
+file selector, we want it to trigger event when the user selects a
+file. A @class{FilePreviewMorph} emits a @smalltalk{#selected} event
+each time the user clicks it, let's capture this event to manage it
+internally:
 
-@subsection Beyond the simple string request morph
+@smalltalkMethod{entryPreviewFor: fileEntry,
+../..
+fileView when: #selected send: #toggleSelection: to: self with: fileView.
+@return{} fileView}
+
+
+@cindex event @subentry emitter
+@cindex event @subentry @msg{triggerEvent:}
+@cindex event @subentry @msg{triggerEvent:with:}
+
+Then we define the behavior for the @msg{toggleSelection:} message:
+
+@smalltalkMethod{toggleSelection: fileView,
+| selectedView |
+selectedView := cells detect: [:aFileView | aFileView isSelected] ifNone: [nil].	
+selectedView = fileView
+   ifTrue: [
+      fileView toggleSelection. " unselect view@comma{} no view selected anymore "
+      selectedView := nil]			
+   ifFalse: [
+      selectedView ifNotNil: [selectedView toggleSelection].
+      fileView selected: true.
+      selectedView := fileView].
+selectedView 
+   ifNil: [self triggerEvent: #noSelection]
+   ifNotNil: [self triggerEvent: #selectedFile with: selectedView fileEntry]}
+
+To visualise the events propagation, instantiate a new file selector
+and capture its event:
+
+@smalltalkExample{| selector |
+selector := FileSelectorPane new openInWorld.
+selector when: #noSelection send: #print to: 'no entry'.
+selector when: #selectedFile send: #show: to: Transcript}
+
+@cindex event @subentry @msg{removeAllActions}
+@cindex event @subentry remove
+To strop listening to events, just execute on the listener instance
+@smalltalk{selector removeAllActions}.
+
+Morph are both listener and emitter of events. Doing so is important
+for decoupling the objects between each others and to improve objects
+reuse.
+
+We designed the @class{FileSelectorPane} to be itself reusable in
+other morph. In the next section we illustrate its use to improve the
+usability of the @class{StringRequestMoprh}, a morph used -- among
+other things -- to ask the user to select a file.
+
+@subsection Beyond string request morph
 
 Let's extend the behavior of the @class{StringRequestMoprh} to add the
 option to the user to select a file visually in an unfolded pane. The
