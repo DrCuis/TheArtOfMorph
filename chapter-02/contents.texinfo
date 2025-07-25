@@ -127,13 +127,22 @@ widgets. However, in some circumstance, we want both to arrange
 widgets and be notified about specific user interactions. This is what
 does the @class{CheckGroup} and @class{RadioGroup} classes.
 
-@cindex morph @subentry @class{CheckGroup}
-@subsection Be notified
-As in @class{LabelGroup}, a @class{CheckGroup} presents a collection
-of labels with associated widgets, here @class{CheckButtonMorph}.
 
-In a @class{CheckGroup}, zero or more @class{CheckButtonMorph} can be
-selected at once, contrary to a @class{RadioGroup} where only one
+@cindex morph @subentry event
+@cindex morph @subentry @class{CheckGroup}
+@cindex morph @subentry @class{RadioGroup}
+@subsection Be notified
+
+Once morphs are arranged in a layout, it makes sense to be notified
+through events when the user interacts with some of the arranged
+morphs. Under this perspective, the @class{LabelGroup} class is
+absolutely passive, contrary to the @class{CheckGroup} class we will
+present now.
+
+As a @class{LabelGroup}, a @class{CheckGroup} presents a collection of
+labels with associated widgets, here @class{CheckButtonMorph}. In a
+@class{CheckGroup}, zero or more @class{CheckButtonMorph} can be
+selected at once. In a @class{RadioGroup}, a subclass, only one
 @class{RadioButtonMorph} is selected at once.
 
 @figure{A check group to select among the baby squeaks,ch02-checkGroup,3}
@@ -167,13 +176,14 @@ class>>example2}.
 @node Scroll pane
 @section Scroll pane
 @c Present use case
-Compare to the @class{LayoutMorph} class, the
+Compared to the @class{LayoutMorph} class, the
 @class{PluggableScrollPane} class doesn't have much subclasses. We
 found ones for all sort of list of items or text editor with need to
 scroll contents.
 
 This class doesn't need to be subclassed to be useful, each time you
-want to present a morph of a large extent, try to use it:
+want to present a morph with a large extent, embed it in a scroll
+pane:
 
 @smalltalkExampleCaption{Bezier curves on a scroller, bezierScroller,
 PluggableScrollPane new ::
@@ -205,12 +215,15 @@ updated simultaneously.
 
 @figure{Flow of boxes of various sizes,ch02-flowLayoutMorph,6}
 
-@c Write a folder viewer morph, should react to event when entering a new folder
-@c or double clicking on a file, etc
+@node File Selector
+@section File Selector
+So far we have observed existing morphs found in @cuis{}
+repositories. Let's now build our own new morph.
 
-Now let's do something fun: a poor man file selector. All it takes is
-to get the entries of a given directory, collect them as previews and
-add them all in a flow layout:
+@subsection Poor man implementation
+First, let's do something quick and fun: a poor man file selector. All
+it takes is to get the entries of a given directory, collect them as
+previews and add them all in a flow layout:
 
 @smalltalkExample{| directories |
 directories := DirectoryEntry userBaseDirectory children collect: [:anEntry |
@@ -222,15 +235,28 @@ directories := DirectoryEntry userBaseDirectory children collect: [:anEntry |
       borderColor: Color transparent;
       color: Color transparent].
 FlowLayoutMorph new ::
-   openInWorld ;
-cells: directories }
+   openInWorld;
+   cells: directories }
 
 Of course at this stage, we can't browse in the directories tree:
 
 @figure{A basic tool to list the files in a folder,ch02-fileSelectorBasic,7}
 
-To add more behavior to our poor man file selector, we want to
-subclass it from @class{FlowLayoutMorph}:
+To add more behavior to our poor man file selector, we want to make
+our first morph by reusing existing components.
+
+@cindex morph @subentry @class{FileSelectorPane}
+@subsection Our first morph design by reuse
+Our morph will present visually files and directories of a given
+location in the disk of the host. As we want this morph to be reused
+by other GUI designer, it doesn't present itself in a window but in a
+simple surface, a pane. Therefore we name it @class{FileSelectorPane},
+it emits event when the user selects a file. It updates itself with
+new contents when the user double-clicks on a folder.
+
+Because we may have numerous files and directories to present, we
+create our @class{FileSelectorPane} as a subclass of
+@class{FlowLayoutMorph}:
 
 @smalltalkExample{FlowLayoutMorph subclass: #FileSelectorPane
    instanceVariableNames: ''
@@ -240,7 +266,7 @@ subclass it from @class{FlowLayoutMorph}:
 
 In its parents hierarchy, our @class{FileSelectorPane} has the
 @class{PluggableMorph} ancestor, this one is observing a
-@smalltalk{model}. In our present context, the @smalltalk{model}
+@smalltalk{model}. In the present context, the @smalltalk{model}
 represents the currently observed @class{DirectoryEntry}. It is set by
 default to the user base directory:
 
@@ -292,23 +318,13 @@ fileEntry isDirectoryEntry ifTrue: [
 @return{} fileView }
 
 To integrate this widget with other morph, particularly to behave as a
-file selector, we need it to trigger event when the browsed directory
-is changed. This is discussed in the next section.
+file selector, we need it to trigger event when user select a
+file. This is discussed in the next section.
 
+@subsection Beyond the simple string request morph
 
-@node File Selector
-@section File Selector
-@c Based on previous sections, write this new file selector morph
-
-So far we have observed existing morphs found in @cuis{}
-repositories. Let's now build our own new morph.
-
-We suggest to design a file selector morph: its purpose is to let the
-user to browse among the folders of the host, then to select a file or
-a folder of choice.
-
-It will extend the behavior of the @class{StringRequestMoprh} to add
-the option to the user to select a file visually in an unfolded
-pane. The sketch below presents this behavior:
+Let's extend the behavior of the @class{StringRequestMoprh} to add the
+option to the user to select a file visually in an unfolded pane. The
+sketch below presents this behavior:
 
 @figure{A sketch depicting a file selector and its behavior,ch02-fileSelectorSketch,10}
