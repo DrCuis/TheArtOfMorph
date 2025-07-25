@@ -1,6 +1,7 @@
-'From Cuis7.5 [latest update: #7345] on 19 July 2025 at 1:38:58 pm'!
+'From Cuis7.5 [latest update: #7345] on 25 July 2025 at 7:58:29 pm'!
 'Description '!
-!provides: 'ArtOfMorph' 1 4!
+!provides: 'ArtOfMorph' 1 5!
+!requires: 'UI-Widgets' 1 54 nil!
 SystemOrganization addCategory: #ArtOfMorph!
 
 
@@ -16,7 +17,7 @@ EllipseDemo class
 
 !classDefinition: #FileSelectorPane category: #ArtOfMorph!
 FlowLayoutMorph subclass: #FileSelectorPane
-	instanceVariableNames: 'current'
+	instanceVariableNames: ''
 	classVariableNames: ''
 	poolDictionaries: ''
 	category: 'ArtOfMorph'!
@@ -134,7 +135,7 @@ initialize
 	self open: DirectoryEntry userBaseDirectory
 	! !
 
-!FileSelectorPane methodsFor: 'private' stamp: 'hlsf 7/19/2025 13:30:42'!
+!FileSelectorPane methodsFor: 'private' stamp: 'hlsf 7/25/2025 19:32:39'!
 entryPreviewFor: fileEntry
 	| fileView |
 	fileView := FilePreviewMorph 
@@ -148,6 +149,7 @@ entryPreviewFor: fileEntry
 		color: Color transparent.
 	fileEntry isDirectoryEntry ifTrue: [
 		fileView when: #doubleClick send: #open: to: self with: fileEntry].
+	fileView when: #selected send: #toggleSelection: to: self with: fileView.
 	^ fileView ! !
 
 !FileSelectorPane methodsFor: 'private' stamp: 'hlsf 7/19/2025 11:57:59'!
@@ -168,3 +170,19 @@ open: aDirectoryEntry
 		addAll: (self previewsFor: model directories);
 		addAll: (self previewsFor: model files ).
 	self cells: entryViews ! !
+
+!FileSelectorPane methodsFor: 'events' stamp: 'hlsf 7/25/2025 19:22:15'!
+toggleSelection: fileView
+	| selectedView |
+	selectedView := cells detect: [:aFileView | aFileView isSelected] ifNone: [nil].	
+	selectedView = fileView
+		ifTrue: [
+			fileView toggleSelection. " unselect view, no view selected anymore "
+			selectedView := nil]			
+		ifFalse: [
+			selectedView ifNotNil: [selectedView toggleSelection].
+			fileView selected: true.
+			selectedView := fileView].
+	selectedView 
+		ifNil: [self triggerEvent: #noSelection]
+		ifNotNil: [self triggerEvent: #selectedFile with: selectedView fileEntry]! !
