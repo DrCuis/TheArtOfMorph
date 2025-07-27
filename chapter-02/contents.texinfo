@@ -238,7 +238,7 @@ previews and add them all in a flow layout:
 directories := DirectoryEntry userBaseDirectory children collect: [:anEntry |
    FilePreviewMorph 
       object: anEntry 
-      image: ((anEntry isFileEntry ifTrue: [Theme current genericTextIcon] ifFalse: [Theme current fetch: #( '16x16' 'places' 'folder' )]) magnifyTo: 48@@48)
+      image: ((anEntry isFileEntry ifTrue: [Theme current genericTextIcon] ifFalse: [Theme current fetch: #( '16x16' 'places' 'folder' )]) magnifyTo: 64@@64)
       buttons: nil
       label: anEntry baseName ::
       borderColor: Color transparent;
@@ -435,12 +435,19 @@ fileBrowser
    openInWorld}
 
 In this method two important points: the @method{directoryEntry}
-answer the current directory, its tries to be a little smart depending
-on the content of the text entry, so the file selector opens on the
-wished location; next we listen to the event @smalltalk{#selectedFile}
-emitted by the @class{FileSelectorPane} when the user selects a file
-or directory.
+method answers the current directory as edited by the user and the
+@smalltalk{#selectedFile} event emitted by the
+@class{FileSelectorPane} is observed by the @method{entry:}
+method. Each time the user selects a file, the message @msg{entry:} is
+sent to the @class{FileRequestMorph} instance:
+
+@smalltalkMethod{entry: anEntry,
+textMorph hasUnacceptedEdits: false.
+response := anEntry asString.
+self changed: #response.
+textMorph hasUnacceptedEdits: true}
 
 
 
 	
+@figure{File request morph with file browser unfolded,ch02-FileRequestMorph,10}
