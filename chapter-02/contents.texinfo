@@ -4,11 +4,13 @@
 @*
 
 In this chapter you will learn how to design new morph -- in the idea
-of a new widget -- by assembling existing ones. This chapter will be
-very familliar with the booklet @emph{Design GUI with Morph}, and it
-is a good idea to read its @url{Layout
-components,https://DrCuis.github.io/DesignGUI/Layout-components.html}
-chapter before.
+of a new widget -- by assembling existing ones. We first illustrate
+the topic with existing morphs from the @cuis{} system and the
+@label{Cuis-Smalltalk-UI} repository. Then we dive-in the design of a
+new morph -- a file selector -- gradually improving it from a quick
+design in a @label{Workspace} to a class of its own. Finally, its
+design is bullet proof tested by reusing it in an end-user
+@acronym{GUI}.
 
 
 @menu
@@ -51,9 +53,9 @@ additional characteristics. Subclassing these classes will require
 most of the time overriding the @method{drawOn:} method.
 
 @item
-@class{LayoutMorph}. It has 11 subclasses. It is designed to assemble
-morphs in a new morph, using this class for reuse makes perfectly
-sense and we already know how to use it.
+@class{LinearLayoutMorph}. It has 11 subclasses. It is designed to
+assemble morphs in a new morph, using this class for reuse makes
+perfectly sense and we already know how to use it.
 
 @item
 @class{SystemWindow}. As a view representing a whole application,
@@ -77,15 +79,19 @@ and in some circumstances it makes sense to subclass it.
 @end enumerate
 
 All in all, we have two candidates to subclass when conceiving a morph
-by reuse: @class{LayoutMorph} and @class{PluggableScrollPane}.
+by reuse: @class{LinearLayoutMorph} and @class{PluggableScrollPane}.
 
-
+@cindex morph @subentry layout
 @node Layout
 @section Layout
+This section will be very familliar with the booklet @emph{Design GUI
+with Morph}, and it is a good idea to read its @url{Layout
+components,https://DrCuis.github.io/DesignGUI/Layout-components.html}
+chapter before.
 
-Arranging a set of morphs is what does the @class{LayoutMorph} class,
-therefore it makes sense to define a new morph based on layout then to
-install a set of morphs into. This is exactly what does the
+Arranging a set of morphs is what does the @class{LinearLayoutMorph}
+class, therefore it makes sense to define a new morph based on layout
+then to install a set of morphs into. This is exactly what does the
 @class{LabelGroup} class of the @label{Cuis-Smalltalk-UI} package.
 
 
@@ -94,9 +100,10 @@ install a set of morphs into. This is exactly what does the
 @cindex layout @subentry @class{LabelGroup}
 @subsection Arrange visually
 
-This subclass of @class{LayoutMorph} takes a collection of textual
-descriptions and morphs to arrange them in two columns of labels and
-morphs. The idea is to give a label to widgets presented in a view.
+This subclass of @class{LinearLayoutMorph} takes a collection of
+textual descriptions and morphs to arrange them in two columns of
+labels and morphs. The idea is to give a label to widgets presented in
+a view.
 
 @figure{A group of three morphs@comma{} each with its own
 label,ch02-labelGroup,9}
@@ -176,7 +183,7 @@ class>>example2}.
 @node Scroll pane
 @section Scroll pane
 @c Present use case
-Compared to the @class{LayoutMorph} class, the
+Compared to the @class{LinearLayoutMorph} class, the
 @class{PluggableScrollPane} class doesn't have much subclasses. We
 found ones for all sort of list of items or text editor with need to
 scroll contents.
@@ -190,6 +197,8 @@ PluggableScrollPane new ::
    scroller: Sample02Bezier new;
    color: Color white;
    openInWorld}
+
+@figure{A scroll pane encapsulating Bézier curves with scroll bars,ch02-scrollPane,5}
 
 @cindex morph @subentry @class{FlowLayoutMorph}
 Among its few subclasses, @class{FlowLayoutMorph} extends the behavior
@@ -217,8 +226,8 @@ updated simultaneously.
 
 @node File Selector
 @section File Selector
-So far we have observed existing morphs found in @cuis{}
-repositories. Let's now build our own new morph.
+So far we have observed existing morphs. Let's now build our own new
+morph.
 
 @subsection Poor man implementation
 First, let's do something quick and fun: a poor man file selector. All
@@ -275,7 +284,7 @@ super initialize.
 self open: DirectoryEntry userBaseDirectory}
 
 When opening a new location, directories and files are collected and
-sorted separatly, in two groups, to build meaning full pre-views,
+sorted separatly, in two groups, to build meaningful pre-views:
 
 @smalltalkMethod{open: aDirectoryEntry,
 | entryViews |
@@ -346,8 +355,8 @@ Then we define the behavior for the @msg{toggleSelection:} message:
 | selectedView |
 selectedView := cells detect: [:aFileView | aFileView isSelected] ifNone: [nil].	
 selectedView = fileView
-   ifTrue: [
-      fileView toggleSelection. " unselect view@comma{} no view selected anymore "
+   ifTrue: [ " unselect view@comma{} no view selected anymore "
+      fileView toggleSelection.
       selectedView := nil]			
    ifFalse: [
       selectedView ifNotNil: [selectedView toggleSelection].
@@ -357,8 +366,8 @@ selectedView
    ifNil: [self triggerEvent: #noSelection]
    ifNotNil: [self triggerEvent: #selectedFile with: selectedView fileEntry]}
 
-To visualise the events propagation, instantiate a new file selector
-and capture its event:
+To visualise in the @label{Transcript} window the events propagation,
+instantiate a new file selector and capture its events:
 
 @smalltalkExample{| selector |
 selector := FileSelectorPane new openInWorld.
@@ -367,8 +376,8 @@ selector when: #selectedFile send: #show: to: Transcript}
 
 @cindex event @subentry @msg{removeAllActions}
 @cindex event @subentry remove
-To strop listening to events, just execute on the listener instance
-@smalltalk{selector removeAllActions}.
+To strop listening to events, just send the @msg{removeAllActions}
+message to the listener: @smalltalk{selector removeAllActions}.
 
 Morph are both listener and emitter of events. Doing so is important
 for decoupling the objects between each others and to improve objects
@@ -377,12 +386,61 @@ reuse.
 We designed the @class{FileSelectorPane} to be itself reusable in
 other morph. In the next section we illustrate its use to improve the
 usability of the @class{StringRequestMoprh}, a morph used -- among
-other things -- to ask the user to select a file.
+other things -- to ask the user to key-in a file name; we want to
+improve to make it more user friendly.
 
+@cindex morph @subentry @class{StringRequestMorph}
 @subsection Beyond string request morph
-
-Let's extend the behavior of the @class{StringRequestMoprh} to add the
-option to the user to select a file visually in an unfolded pane. The
-sketch below presents this behavior:
+As illustrated by the sketch below, the idea is to have a file pane
+that expands on user request, the user then selects a file or a
+directory directly by pointing it on the pane.
 
 @figure{A sketch depicting a file selector and its behavior,ch02-fileSelectorSketch,10}
+
+Let's extend the behavior of @class{StringRequestMoprh}:
+
+@smalltalkExample{StringRequestMorph subclass: #FileRequestMorph
+   instanceVariableNames: 'fileBrowser'
+   classVariableNames: ''
+   poolDictionaries: ''
+   category: 'ArtOfMorph'}
+
+We add an the instance variable @smalltalk{fileBrowser} to hold our
+file selector when it is unfolded. We override a few methods from
+@class{StringRequestMorph}. We add a button to unfold/fold the file
+browser:
+
+@smalltalkMethod{FileRequestMorph>>addTextPane,
+super addTextPane.
+submorphs first addMorph: 
+   ((PluggableButtonMorph model: self action: #toggleFileBrowser)
+      setBalloonText: 'Browse the file system to select a file or directory';
+      icon: (Theme current fetch: #( '16x16' 'places' 'folder' )) )}
+
+When unfolding the file browser, we check its current status if absent
+we instantiate a new one just below the text entry, in the alternative
+we just delete it from screen:
+
+@smalltalkMethod{toggleFileBrowser,
+fileBrowser ifNotNil: [
+   fileBrowser delete.
+   fileBrowser := nil.
+   ^ self].
+fileBrowser := FileSelectorPane new open: self directoryEntry.
+fileBrowser when: #selectedFile send: #entry: to: self.
+fileBrowser 
+   color: (Color white alpha: 0.8);
+   morphPosition: self morphPosition + (0 @ (self morphHeight + 5));
+   morphExtent: self morphExtent * (1@@5);
+   openInWorld}
+
+In this method two important points: the @method{directoryEntry}
+answer the current directory, its tries to be a little smart depending
+on the content of the text entry, so the file selector opens on the
+wished location; next we listen to the event @smalltalk{#selectedFile}
+emitted by the @class{FileSelectorPane} when the user selects a file
+or directory.
+
+
+
+	

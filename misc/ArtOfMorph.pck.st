@@ -1,6 +1,6 @@
-'From Cuis7.5 [latest update: #7345] on 25 July 2025 at 7:58:29 pm'!
+'From Cuis7.5 [latest update: #7356] on 27 July 2025 at 10:54:25 am'!
 'Description '!
-!provides: 'ArtOfMorph' 1 5!
+!provides: 'ArtOfMorph' 1 6!
 !requires: 'UI-Widgets' 1 54 nil!
 SystemOrganization addCategory: #ArtOfMorph!
 
@@ -13,6 +13,16 @@ ColoredBoxMorph subclass: #EllipseDemo
 	category: 'ArtOfMorph'!
 !classDefinition: 'EllipseDemo class' category: #ArtOfMorph!
 EllipseDemo class
+	instanceVariableNames: ''!
+
+!classDefinition: #FileRequestMorph category: #ArtOfMorph!
+StringRequestMorph subclass: #FileRequestMorph
+	instanceVariableNames: 'fileBrowser'
+	classVariableNames: ''
+	poolDictionaries: ''
+	category: 'ArtOfMorph'!
+!classDefinition: 'FileRequestMorph class' category: #ArtOfMorph!
+FileRequestMorph class
 	instanceVariableNames: ''!
 
 !classDefinition: #FileSelectorPane category: #ArtOfMorph!
@@ -128,6 +138,94 @@ wantsContour
 !EllipseDemo methodsFor: 'geometry testing' stamp: 'hlsf 6/11/2025 19:05:04'!
 requiresVectorCanvas
 	^ true ! !
+
+!FileRequestMorph methodsFor: 'initialization' stamp: 'hlsf 7/26/2025 16:39:35'!
+addTextPane
+	"Add a text pane and two buttons."
+	
+	| controlsContainer |
+	textMorph := (TextModelMorph
+		textProvider: self
+		textGetter: #response
+		textSetter: #response:
+		selectionGetter: #selectionInterval) emptyTextDisplayMessage: 'Enter response'.
+	self
+		valueOfProperty: #emptyTextDisplayMessage
+		ifPresentDo: [ :msg |
+			textMorph emptyTextDisplayMessage: msg ].
+	textMorph
+		hasUnacceptedEdits: true;
+		acceptOnCR: true;
+		escAction: [ self cancel ].
+	(controlsContainer := LayoutMorph newRow)
+		addMorphUseAll: textMorph;
+		addMorph: 
+			((PluggableButtonMorph model: textMorph scroller action: #toggleFileBrowser)
+				setBalloonText: 'Browse the file system to select file or directory' bold;
+				icon: (Theme current fetch: #( '16x16' 'places' 'folder' )) );
+		addMorph: 
+			((PluggableButtonMorph model: textMorph scroller action: #acceptContents)
+				setBalloonText: 'OK' bold, ' (accept input)';
+				icon: Theme current acceptIcon);
+		addMorph:
+			((PluggableButtonMorph model: self action: #cancel)
+				setBalloonText: 'Cancel' bold, '  (discard input)';
+				icon: Theme current cancelIcon).
+	self addMorphUseAll: controlsContainer! !
+
+!FileRequestMorph methodsFor: 'initialization' stamp: 'hlsf 7/26/2025 16:24:59'!
+setQuery: queryString initialAnswer: initialAnswer
+	| titleMorphExtent titleHeight titleWidth requiredLines lineWidth contentsWidth maxLineWidth extraWidth |
+	response := initialAnswer.
+	titleMorphExtent := self addTitle: queryString.
+	titleWidth := 20 * FontFamily defaultPointSize max: titleMorphExtent x.
+	titleHeight := titleMorphExtent y + FontFamily defaultLineSpacing. "Some extra room for borders, etc."
+	self addTextPane.
+
+	requiredLines := 0.
+	"Single line preferred. For instance, for file names and paths."
+	(response noneSatisfy: [ :each | each isSeparator ]) ifTrue: [
+		maxLineWidth := Display width * 0.8.
+		contentsWidth := FontFamily defaultFamilyAndPointSize widthOfString: response asString.
+		contentsWidth < maxLineWidth ifTrue: [
+			"Will fit in the screen. Ok."
+			requiredLines := 1.
+			extraWidth := (10 * FontFamily defaultPointSize). "Some extra room for edition plus accept/cancel buttons." ]].
+
+	"May need to be multiple lines"
+	requiredLines = 0 ifTrue: [
+		maxLineWidth := Display width // 3.
+		contentsWidth := 0.
+		response linesDo: [ :eachLine |
+			lineWidth := FontFamily defaultFamilyAndPointSize widthOfString: eachLine.
+			contentsWidth := contentsWidth max: (lineWidth min: maxLineWidth).
+			requiredLines := requiredLines + (lineWidth / maxLineWidth) ceiling ].
+		extraWidth := (10 * FontFamily defaultPointSize). "Some extra room for edition plus accept/cancel buttons."
+		requiredLines := requiredLines min: 20. "Use scrollbars if needed." 		].
+
+	self morphExtent: ((titleWidth max: contentsWidth) + extraWidth)@(titleHeight + (FontFamily defaultLineSpacing * requiredLines)).! !
+
+!FileRequestMorph methodsFor: 'accessing' stamp: 'hlsf 7/26/2025 16:28:25'!
+response
+	^ response asString
+! !
+
+!FileRequestMorph methodsFor: 'accessing' stamp: 'hlsf 7/26/2025 16:35:55'!
+response: aText
+	" Try to guess if user inputed an existing file or alternatively a directory, existing or not "
+	response := aText asFileEntry exists
+		ifTrue: [aText asFileEntry]
+		ifFalse: [aText asDirectoryEntry]
+	
+! !
+
+!FileRequestMorph methodsFor: 'accessing' stamp: 'hlsf 7/27/2025 10:53:50'!
+toggleFileBrowser
+	fileBrowser ifNotNil: [
+		fileBrowser delete.
+		fileBrowser := nil.
+		^ self].
+	fileBrowser := FileSelectorPane new	open: response asDirectoryEntry.! !
 
 !FileSelectorPane methodsFor: 'initialization' stamp: 'hlsf 7/19/2025 13:26:16'!
 initialize
