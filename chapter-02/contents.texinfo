@@ -450,11 +450,11 @@ textMorph hasUnacceptedEdits: true}
 @figure{File request morph and its file browser unfolded,ch02-FileRequestMorph,10}
 
 We end here our chapter on designing morph by reusing existing
-ones. Our @class{FileRequestMorph} example is far to be complete from
-the usability perspective, user interface grows on small
-details. There is a lot of room for improvements: the printed filename
-below the icons are ridiculously too short, a distinction between file
-or folder selection when the tool is invoked will allow a more precise
-behavior in the usability, the button to unfold & fold the file
-browser could have a selected state. These improvement are good
-exercises.
+ones. From the usability perspective, our @class{FileRequestMorph}
+example is far to be complete; user interface grows on small
+details. There is a lot of room for improvements: the printed
+filenames below the icons are ridiculously short, a distinction
+between file and folder selection when the tool is invoked will allow
+a more precise usability behavior, the button to unfold & fold the
+file browser could have a selected state. These improvements are good
+exercises to strengthen your skill.

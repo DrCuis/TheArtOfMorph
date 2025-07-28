@@ -3,6 +3,59 @@
 
 When you imagine an unconventional way to interact with the computer,
 it may indicate you are on the verge to design new morphs from
-scratch: a new way to present information or/and to interact with.
+scratch: a new way to present information or/and to interact
+with. This chapter will help you in that circumstances.
 
-This chapter will help you in that circumstances.
+As we did in the previous chapter, we take a look at existing morphs
+to learn from them, then we create our own morph.
+
+@cindex morph @subentry @method{drawOn:}
+@node A bit of introspection
+@section A bit of introspection
+Morphs implemented from scratch come with a @method{drawOn:} method to
+produce its visual representation. We already met this method in the
+@ref{Introduction}. Let's interrogate our running @cuis{} system to
+analyze which morphs are involved:
+
+@smalltalkExampleCaption{How many morphs implement drawing operations?,morphImplementDrawOn,
+Morph allSubclasses size.
+@result{} 155.
+
+(Morph allSubclasses select: [:each | each selectors includes: #drawOn:]) size.
+@result{} 69.}
+
+We observe the majority of morphs are implemented by composing
+existing morphs, this was the topic of the previous chapter. We want
+to interrogate the @cuis{} system a bit further by considering the
+line count of the @method{drawOn:} method of each morph.
+
+@smalltalkExampleCaption{Line count of each @method{drawOn:},morphDrawOnLineCount,
+| morphs |
+morphs := Morph allSubclasses select: [:each | each selectors includes: #drawOn:].
+morphs sort: [:classA :classB |
+   (classA sourceCodeAt: #drawOn:) lineCount > (classB sourceCodeAt: #drawOn:) lineCount]}
+
+@cindex tools @subentry object explorer
+This script should be executed to open on an object explorer,
+@kbd{Alt-Shift-I}.
+
+Sadly, this result is not representative of the complexity of the
+drawing operations. Indeed, well written Smalltalk code tends to span
+over small & well factored methods. Nevertheless, the object explorer
+let us quickly jump from one method to another.
+
+To improve the exploring experience of the @cuis{} system, we go a bit
+further in our previous script to present both the classes and the
+source codes of the @method{drawOn:} methods:
+
+@smalltalkExampleCaption{Tooling to review each @method{drawOn:},morphDrawOnViewer,
+| morphs |
+morphs := Morph allSubclasses select: [:each | each selectors includes: #drawOn:].
+morphs := morphs sort: [:classA :classB |
+   (classA sourceCodeAt: #drawOn:) lineCount > (classB sourceCodeAt: #drawOn:) lineCount].
+morphs := morphs collect: [:each | each -> (each sourceCodeAt: #drawOn:)].
+morphs explore.}
+
+Once the code executed, we have an object explorer to review methods:
+
+@figure{Explorer of the draw methods,ch03-exploreDrawOn,14}
