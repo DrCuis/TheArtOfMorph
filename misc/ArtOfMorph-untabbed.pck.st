@@ -1,6 +1,8 @@
-'From Cuis7.3 [latest update: #7248] on 29 June 2025 at 11:09:27 pm'!
+'From Cuis7.5 [latest update: #7383] on 27 July 2025 at 6:09:55 pm'!
 'Description '!
-!provides: 'ArtOfMorph' 1 3!
+!provides: 'ArtOfMorph' 1 7!
+!requires: 'UI-Widgets' 1 54 nil!
+!requires: 'UI-Panel' 1 130 nil!
 SystemOrganization addCategory: #ArtOfMorph!
 
 
@@ -12,6 +14,26 @@ ColoredBoxMorph subclass: #EllipseDemo
    category: 'ArtOfMorph'!
 !classDefinition: 'EllipseDemo class' category: #ArtOfMorph!
 EllipseDemo class
+   instanceVariableNames: ''!
+
+!classDefinition: #FileRequestMorph category: #ArtOfMorph!
+StringRequestMorph subclass: #FileRequestMorph
+   instanceVariableNames: 'fileBrowser'
+   classVariableNames: ''
+   poolDictionaries: ''
+   category: 'ArtOfMorph'!
+!classDefinition: 'FileRequestMorph class' category: #ArtOfMorph!
+FileRequestMorph class
+   instanceVariableNames: ''!
+
+!classDefinition: #FileSelectorPane category: #ArtOfMorph!
+FlowLayoutMorph subclass: #FileSelectorPane
+   instanceVariableNames: ''
+   classVariableNames: ''
+   poolDictionaries: ''
+   category: 'ArtOfMorph'!
+!classDefinition: 'FileSelectorPane class' category: #ArtOfMorph!
+FileSelectorPane class
    instanceVariableNames: ''!
 
 
@@ -117,3 +139,127 @@ wantsContour
 !EllipseDemo methodsFor: 'geometry testing' stamp: 'hlsf 6/11/2025 19:05:04'!
 requiresVectorCanvas
    ^ true ! !
+
+!FileRequestMorph methodsFor: 'initialization' stamp: 'hlsf 7/27/2025 14:46:09'!
+addTextPane
+   super addTextPane.
+   submorphs first addMorph: 
+         ((PluggableButtonMorph model: self action: #toggleFileBrowser)
+            setBalloonText: 'Browse the file system to select a file or directory';
+            icon: (Theme current fetch: #( '16x16' 'places' 'folder' )) )! !
+
+!FileRequestMorph methodsFor: 'accessing' stamp: 'hlsf 7/27/2025 15:10:38'!
+directoryEntry
+   | editedContents | 
+   editedContents := textMorph scroller contents asPlainString.
+   ^ editedContents asFileEntry exists
+      ifTrue: [editedContents asFileEntry parent] 
+      ifFalse: [editedContents asDirectoryEntry exists 
+         ifTrue: [editedContents asDirectoryEntry ] ifFalse: [editedContents asDirectoryEntry parent] ]! !
+
+!FileRequestMorph methodsFor: 'accessing' stamp: 'hlsf 7/27/2025 14:33:32'!
+response: aText
+   | answer |
+   answer := super response: aText.
+   (answer and: [fileBrowser notNil]) ifTrue: [fileBrowser delete].   
+   ^ answer! !
+
+!FileRequestMorph methodsFor: 'accessing' stamp: 'hlsf 7/27/2025 12:59:21'!
+toggleFileBrowser
+   fileBrowser ifNotNil: [
+      fileBrowser delete.
+      fileBrowser := nil.
+      ^ self].
+   fileBrowser := FileSelectorPane new   open: self directoryEntry.
+   fileBrowser when: #selectedFile send: #entry: to: self.
+   fileBrowser 
+      color: (Color white alpha: 0.8);
+      morphPosition: self morphPosition + (0 @ (self morphHeight + 5));
+      morphExtent: self morphExtent * (1@5);
+      openInWorld
+
+   ! !
+
+!FileRequestMorph methodsFor: 'events' stamp: 'hlsf 7/27/2025 14:42:52'!
+entry: anEntry
+   textMorph hasUnacceptedEdits: false.
+   response := anEntry asString.
+   self changed: #response.
+   textMorph hasUnacceptedEdits: true.! !
+
+!FileRequestMorph methodsFor: 'private' stamp: 'hlsf 7/27/2025 12:50:16'!
+cancel
+   super cancel.
+   fileBrowser ifNotNil: [fileBrowser delete]! !
+
+!FileRequestMorph class methodsFor: 'as yet unclassified' stamp: 'hlsf 7/27/2025 18:09:49'!
+example
+"
+   FileRequestMorph example   
+"
+   ^ FileRequestMorph 
+      request: 'Select a file or directory' 
+      initialAnswer: DirectoryEntry userBaseDirectory asString 
+      orCancel: nil.
+! !
+
+!FileSelectorPane methodsFor: 'initialization' stamp: 'hlsf 7/19/2025 13:26:16'!
+initialize
+   super initialize.
+   self open: DirectoryEntry userBaseDirectory
+   ! !
+
+!FileSelectorPane methodsFor: 'private' stamp: 'hlsf 7/27/2025 17:56:30'!
+entryPreviewFor: fileEntry
+   | fileView |
+   fileView := FilePreviewMorph 
+      object: fileEntry 
+      image: ((fileEntry isFileEntry 
+         ifTrue: [Theme current genericTextIcon] 
+         ifFalse: [Theme current fetch: #( '16x16' 'places' 'folder' )]) magnifyTo: 64@64)
+      buttons: nil
+      label: fileEntry baseName ::
+      borderColor: Color transparent;
+      color: Color transparent.
+   fileEntry isDirectoryEntry ifTrue: [
+      fileView when: #doubleClick send: #open: to: self with: fileEntry].
+   fileView when: #selected send: #toggleSelection: to: self with: fileView.
+   ^ fileView ! !
+
+!FileSelectorPane methodsFor: 'private' stamp: 'hlsf 7/19/2025 11:57:59'!
+previewsFor: entries
+   ^ (entries sort: [:a :b | a baseName asUppercase < b baseName asUppercase ]) collect: [:anEntry | 
+      self entryPreviewFor: anEntry]! !
+
+!FileSelectorPane methodsFor: 'accessing' stamp: 'hlsf 7/27/2025 11:58:21'!
+open: aDirectoryEntryorPreview
+   | entryViews |
+   model := aDirectoryEntryorPreview class = FilePreviewMorph 
+      ifTrue: [aDirectoryEntryorPreview fileEntry]
+      ifFalse: [aDirectoryEntryorPreview ].
+   entryViews := OrderedCollection new.
+   model isRoot ifFalse: [ | parentView |
+      parentView := self entryPreviewFor: model parent.
+      parentView relabel: '..' bold.
+      entryViews add: parentView].
+   entryViews 
+      addAll: (self previewsFor: model directories);
+      addAll: (self previewsFor: model files ).
+   self cells: entryViews.
+   self updateLayout ! !
+
+!FileSelectorPane methodsFor: 'events' stamp: 'hlsf 7/25/2025 19:22:15'!
+toggleSelection: fileView
+   | selectedView |
+   selectedView := cells detect: [:aFileView | aFileView isSelected] ifNone: [nil].   
+   selectedView = fileView
+      ifTrue: [
+         fileView toggleSelection. " unselect view, no view selected anymore "
+         selectedView := nil]         
+      ifFalse: [
+         selectedView ifNotNil: [selectedView toggleSelection].
+         fileView selected: true.
+         selectedView := fileView].
+   selectedView 
+      ifNil: [self triggerEvent: #noSelection]
+      ifNotNil: [self triggerEvent: #selectedFile with: selectedView fileEntry]! !

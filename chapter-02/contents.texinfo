@@ -1,5 +1,5 @@
-@node Design Morph by reuse
-@chapter Design Morph by reuse
+@node Design by reuse
+@chapter Design by reuse
 
 @*
 
@@ -410,7 +410,7 @@ file selector when it is unfolded. We override a few methods from
 @class{StringRequestMorph}. We add a button to unfold/fold the file
 browser:
 
-@smalltalkMethod{FileRequestMorph>>addTextPane,
+@smalltalkMethod{addTextPane,
 super addTextPane.
 submorphs first addMorph: 
    ((PluggableButtonMorph model: self action: #toggleFileBrowser)
@@ -437,7 +437,7 @@ fileBrowser
 In this method two important points: the @method{directoryEntry}
 method answers the current directory as edited by the user and the
 @smalltalk{#selectedFile} event emitted by the
-@class{FileSelectorPane} is observed by the @method{entry:}
+@class{FileSelectorPane} is observed and dispatched to the @method{entry:}
 method. Each time the user selects a file, the message @msg{entry:} is
 sent to the @class{FileRequestMorph} instance:
 
@@ -447,7 +447,14 @@ response := anEntry asString.
 self changed: #response.
 textMorph hasUnacceptedEdits: true}
 
+@figure{File request morph and its file browser unfolded,ch02-FileRequestMorph,10}
 
-
-	
-@figure{File request morph with file browser unfolded,ch02-FileRequestMorph,10}
+We end here our chapter on designing morph by reusing existing
+ones. Our @class{FileRequestMorph} example is far to be complete from
+the usability perspective, user interface grows on small
+details. There is a lot of room for improvements: the printed filename
+below the icons are ridiculously too short, a distinction between file
+or folder selection when the tool is invoked will allow a more precise
+behavior in the usability, the button to unfold & fold the file
+browser could have a selected state. These improvement are good
+exercises.
