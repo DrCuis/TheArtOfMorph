@@ -1,6 +1,6 @@
-'From Cuis7.5 [latest update: #7383] on 27 July 2025 at 6:09:55 pm'!
+'From Cuis7.5 [latest update: #7387] on 28 July 2025 at 11:54:23 pm'!
 'Description '!
-!provides: 'ArtOfMorph' 1 7!
+!provides: 'ArtOfMorph' 1 8!
 !requires: 'UI-Widgets' 1 54 nil!
 !requires: 'UI-Panel' 1 130 nil!
 SystemOrganization addCategory: #ArtOfMorph!
@@ -180,7 +180,7 @@ toggleFileBrowser
 
 	! !
 
-!FileRequestMorph methodsFor: 'events' stamp: 'hlsf 7/27/2025 14:42:52'!
+!FileRequestMorph methodsFor: 'events' stamp: 'hlsf 7/28/2025 23:49:31'!
 entry: anEntry
 	textMorph hasUnacceptedEdits: false.
 	response := anEntry asString.
@@ -190,6 +190,11 @@ entry: anEntry
 !FileRequestMorph methodsFor: 'private' stamp: 'hlsf 7/27/2025 12:50:16'!
 cancel
 	super cancel.
+	fileBrowser ifNotNil: [fileBrowser delete]! !
+
+!FileRequestMorph methodsFor: 'private' stamp: 'jmv 7/28/2025 14:40:16'!
+ok
+	self delete.
 	fileBrowser ifNotNil: [fileBrowser delete]! !
 
 !FileRequestMorph class methodsFor: 'as yet unclassified' stamp: 'hlsf 7/27/2025 18:09:49'!
@@ -209,7 +214,7 @@ initialize
 	self open: DirectoryEntry userBaseDirectory
 	! !
 
-!FileSelectorPane methodsFor: 'private' stamp: 'hlsf 7/27/2025 17:56:30'!
+!FileSelectorPane methodsFor: 'private' stamp: 'hlsf 7/28/2025 23:53:42'!
 entryPreviewFor: fileEntry
 	| fileView |
 	fileView := FilePreviewMorph 
@@ -218,7 +223,7 @@ entryPreviewFor: fileEntry
 			ifTrue: [Theme current genericTextIcon] 
 			ifFalse: [Theme current fetch: #( '16x16' 'places' 'folder' )]) magnifyTo: 64@64)
 		buttons: nil
-		label: fileEntry baseName ::
+		label: (fileEntry isRoot ifTrue:['/'] ifFalse: [fileEntry baseName]) ::
 		borderColor: Color transparent;
 		color: Color transparent.
 	fileEntry isDirectoryEntry ifTrue: [

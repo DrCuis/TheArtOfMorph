@@ -44,9 +44,9 @@ drawing operations. Indeed, well written Smalltalk code tends to span
 over small & well factored methods. Nevertheless, the object explorer
 let us quickly jump from one method to another.
 
-To improve the exploring experience of the @cuis{} system, we go a bit
-further in our previous script to present both the classes and the
-source codes of the @method{drawOn:} methods:
+To improve the exploring experience, we can go a bit further in our
+previous script to present both the classes and the source codes of
+the @method{drawOn:} methods:
 
 @smalltalkExampleCaption{Tooling to review each @method{drawOn:},morphDrawOnViewer,
 | morphs |
@@ -56,6 +56,47 @@ morphs := morphs sort: [:classA :classB |
 morphs := morphs collect: [:each | each -> (each sourceCodeAt: #drawOn:)].
 morphs explore.}
 
-Once the code executed, we have an object explorer to review methods:
+Once the code is executed, we have an object explorer to review
+methods. The items at the top of the object explorer are with longer
+@method{drawOn:} method:
 
 @figure{Explorer of the draw methods,ch03-exploreDrawOn,14}
+
+In this list, several are named @class{Sample***}, they are examples
+found in the @label{Morphic-Examples} class category. These classes
+demonstrate the capability of the @label{VectorGraphics} engine.
+
+Let's take a look at the @class{Sample01Cross} and its unique
+@method{drawOn:} method:
+
+@smalltalkMethod{drawOn: aCanvas,
+aCanvas strokeWidth: 8 color: Color lightOrange fillColor: Color red do: [
+   aCanvas polyLine: @{ 100@@0 . 140@@0 . 140@@240 . 100@@240 . 100@@0 @} ].
+   
+aCanvas strokeWidth: 8 color: Color lightOrange fillColor: Color red do: [
+   aCanvas polyLine: @{ 0@@100 . 0@@140 . 240@@140 . 240@@100 . 0@@100 @} ]}
+
+@figure{@class{Smaple01Cross} shape of two rectangles,ch03-sampleStar1,3}
+
+@exercise{Better looking shape,improvedCross, Edit the
+@method{drawOn:} method to render the cross as shown in the image
+below.}
+
+@figure{A better looking cross,ch03-sampleStar2,3}
+
+@cindex morph @subentry @acronym{SVG}
+@cindex morph @subentry @class{AbstractVectorCanvas}
+The method names involved in the code above will look familiar to
+users acquainted to @acronym{SVG,Scalable Vector
+Graphic}@footnote{@url{https://en.wikipedia.org/wiki/SVG}}. It is
+indeed inspired by its specifications, and it may serve as a loose
+reference@footnote{@url{https://www.w3.org/TR/SVG11/}}. Nevertheless,
+your first reference to look at regarding the available drawing
+operations is the @class{AbstractVectorCanvas} class.
+
+In this class, the methods are divided in two important categories:
+the helper methods of the @label{drawing -} categories and the fundamental
+methods in the @label{paths} & @label{strokes} categories.
+
+@figure{Method categories of the
+@class{AbstractVectorCanvas},ch03-AbstractVectorCanvas,7}
