@@ -1,10 +1,20 @@
-'From Cuis7.5 [latest update: #7387] on 28 July 2025 at 11:54:23 pm'!
+'From Cuis7.5 [latest update: #7387] on 29 July 2025 at 4:04:20 pm'!
 'Description '!
-!provides: 'ArtOfMorph' 1 8!
+!provides: 'ArtOfMorph' 1 9!
 !requires: 'UI-Widgets' 1 54 nil!
 !requires: 'UI-Panel' 1 130 nil!
 SystemOrganization addCategory: #ArtOfMorph!
 
+
+!classDefinition: #MedicCross category: #ArtOfMorph!
+PlacedMorph subclass: #MedicCross
+	instanceVariableNames: 'width'
+	classVariableNames: ''
+	poolDictionaries: ''
+	category: 'ArtOfMorph'!
+!classDefinition: 'MedicCross class' category: #ArtOfMorph!
+MedicCross class
+	instanceVariableNames: ''!
 
 !classDefinition: #EllipseDemo category: #ArtOfMorph!
 ColoredBoxMorph subclass: #EllipseDemo
@@ -36,6 +46,40 @@ FlowLayoutMorph subclass: #FileSelectorPane
 FileSelectorPane class
 	instanceVariableNames: ''!
 
+
+!MedicCross commentStamp: 'hlsf 7/29/2025 15:53:25' prior: 0!
+A flashing medical cross
+
+	MedicCross new openInHand
+
+!
+
+!MedicCross methodsFor: 'initialization' stamp: 'hlsf 7/29/2025 15:52:21'!
+initialize
+	super initialize.
+	width := 0! !
+
+!MedicCross methodsFor: 'drawing' stamp: 'hlsf 7/29/2025 15:53:09'!
+drawOn: aCanvas
+	aCanvas strokeWidth: width color: Color green lighter fillColor: Color green do: [
+		aCanvas polyLine: {
+			100@0 .	140@0 .	140@100 . 240@100 . 240@140 .140@140 .
+			140@240 . 100@240 . 100@140 . 0@140 . 	0@100 . 100@100.
+			100@0 } ].! !
+
+!MedicCross methodsFor: 'stepping' stamp: 'hlsf 7/29/2025 15:46:24'!
+step
+	width := width + 0.1.
+	width > 10 ifTrue: [width := 0].
+	self redrawNeeded.! !
+
+!MedicCross methodsFor: 'stepping' stamp: 'hlsf 7/29/2025 15:46:34'!
+stepTime
+	^ 10 ! !
+
+!MedicCross methodsFor: 'stepping' stamp: 'hlsf 7/29/2025 15:52:40'!
+wantsSteps
+	^ true ! !
 
 !EllipseDemo methodsFor: 'accessing' stamp: 'hlsf 6/14/2025 12:17:51'!
 center
@@ -180,7 +224,7 @@ toggleFileBrowser
 
 	! !
 
-!FileRequestMorph methodsFor: 'events' stamp: 'hlsf 7/28/2025 23:49:31'!
+!FileRequestMorph methodsFor: 'events' stamp: 'hlsf 7/29/2025 10:48:13'!
 entry: anEntry
 	textMorph hasUnacceptedEdits: false.
 	response := anEntry asString.
@@ -207,6 +251,10 @@ example
 		initialAnswer: DirectoryEntry userBaseDirectory asString 
 		orCancel: nil.
 ! !
+
+!FileRequestMorph class methodsFor: 'instance creation' stamp: 'hlsf 7/29/2025 10:54:20'!
+request: queryString
+	^ self request: queryString initialAnswer: DirectoryEntry userBaseDirectory asString! !
 
 !FileSelectorPane methodsFor: 'initialization' stamp: 'hlsf 7/19/2025 13:26:16'!
 initialize
@@ -236,12 +284,10 @@ previewsFor: entries
 	^ (entries sort: [:a :b | a baseName asUppercase < b baseName asUppercase ]) collect: [:anEntry | 
 		self entryPreviewFor: anEntry]! !
 
-!FileSelectorPane methodsFor: 'accessing' stamp: 'hlsf 7/27/2025 11:58:21'!
-open: aDirectoryEntryorPreview
+!FileSelectorPane methodsFor: 'accessing' stamp: 'hlsf 7/29/2025 10:48:53'!
+open: aDirectoryEntry
 	| entryViews |
-	model := aDirectoryEntryorPreview class = FilePreviewMorph 
-		ifTrue: [aDirectoryEntryorPreview fileEntry]
-		ifFalse: [aDirectoryEntryorPreview ].
+	model := aDirectoryEntry.
 	entryViews := OrderedCollection new.
 	model isRoot ifFalse: [ | parentView |
 		parentView := self entryPreviewFor: model parent.

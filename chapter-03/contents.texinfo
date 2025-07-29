@@ -62,11 +62,11 @@ methods. The items at the top of the object explorer are with longer
 
 @figure{Explorer of the draw methods,ch03-exploreDrawOn,14}
 
-In this list, several are named @class{Sample***}, they are examples
-found in the @label{Morphic-Examples} class category. These classes
+In this list, several items are @class{Sample***} classes, they are
+examples found in the @label{Morphic-Examples} class category. They
 demonstrate the capability of the @label{VectorGraphics} engine.
 
-Let's take a look at the @class{Sample01Cross} and its unique
+Let's take a look at @class{Sample01Cross} and its unique
 @method{drawOn:} method:
 
 @smalltalkMethod{drawOn: aCanvas,
@@ -76,11 +76,11 @@ aCanvas strokeWidth: 8 color: Color lightOrange fillColor: Color red do: [
 aCanvas strokeWidth: 8 color: Color lightOrange fillColor: Color red do: [
    aCanvas polyLine: @{ 0@@100 . 0@@140 . 240@@140 . 240@@100 . 0@@100 @} ]}
 
-@figure{@class{Smaple01Cross} shape of two rectangles,ch03-sampleStar1,3}
+@figure{@class{Sample01Cross} shape with two rectangles,ch03-sampleStar1,3}
 
 @exercise{Better looking shape,improvedCross, Edit the
-@method{drawOn:} method to render the cross as shown in the image
-below.}
+@method{drawOn:} method to render a cross as shown in the image below
+(@ref{ch03-sampleStar2}).}
 
 @figure{A better looking cross,ch03-sampleStar2,3}
 
@@ -92,11 +92,78 @@ Graphic}@footnote{@url{https://en.wikipedia.org/wiki/SVG}}. It is
 indeed inspired by its specifications, and it may serve as a loose
 reference@footnote{@url{https://www.w3.org/TR/SVG11/}}. Nevertheless,
 your first reference to look at regarding the available drawing
-operations is the @class{AbstractVectorCanvas} class.
+operations is the @class{AbstractVectorCanvas} class then some bits of
+its parent class, @class{MorphicCanvas}.
 
 In this class, the methods are divided in two important categories:
-the helper methods of the @label{drawing -} categories and the fundamental
-methods in the @label{paths} & @label{strokes} categories.
+the helper methods of the @label{drawing -} categories and the
+fundamental Vector Graphics protocol in the @label{paths} &
+@label{strokes} categories.
 
 @figure{Method categories of the
 @class{AbstractVectorCanvas},ch03-AbstractVectorCanvas,7}
+
+
+In its @label{drawing - MorphicCanvas} category observe how its helper
+method to draw a straight line relates to Vector Graphics engine:
+
+@smalltalkMethod{line: pt1 to: pt2 width: morphStrokeWidth color: aStrokeColor,
+self strokeWidth: morphStrokeWidth color: aStrokeColor do: [
+   self moveTo: pt1.
+   self lineTo: pt2 ]}
+
+In the @method{strokeWidth:color:do:} method above, the argument of
+the @smalltalk{do:} keyword is the path followed by the sketch, it
+describes the outline of the shape to construct. It blends very nicely
+in the Smalltalk syntax as a bloc of code. Your drawing operations
+should always be presented in such a bloc. Of course, it can be
+factored in several smaller methods or iterative processes, making it
+a very powerful mean for drawing.
+
+The @label{stroke & fill} method category shows the methods to adjust
+the style of the path stroke. All in all, there are four categories of
+parameters to play with:
+
+@itemize
+@item @strong{width.}
+A float number representing the width of the line.
+
+@item @strong{color.}
+The color of the stroke, it's a @cuis{} @class{Color} instance.
+
+@item @strong{foll color.}
+The filling color, a @class{Color} instance.
+
+@item @strong{dash style.}
+There are three different parameters to play with to represent the
+style of the line.
+
+@end itemize
+
+@c explain the width and point arguments are float
+To be able to use floating numbers instead of integers, help to obtain
+smoother visual rendering. To illustrate it, let's turn our simple
+cross as a flashing medical cross as seen above the drugstore.
+
+Let's rename the class and add a @smalltalk{width} attribute:
+
+@smalltalkExample{PlacedMorph subclass: #MedicCross
+   instanceVariableNames: 'width'
+   classVariableNames: ''
+   poolDictionaries: ''
+   category: 'ArtOfMorph'}
+
+We initialize it properly:
+
+@smalltalkMethod{initialize,
+super initialize.
+width := 0}
+
+@c extend the cross to make it pulse in its width
+
+@cindex morph @subentry step
+@cindex morph @subentry animation
+
+To make it pulse, we use the morphic's step mechanism.
+
+@figure{A flashing medic cross,ch03-medicCross,3}
