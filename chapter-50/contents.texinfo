@@ -8,6 +8,7 @@
 @c Chapter 2
 @node Design from scratch (Solutions)
 @unnumberedsec Design from scratch
+
 @subheading @ref{improvedCross}
 To avoid the unpleasant overlapping of the two rectangles, all the
 drawing operations are to be conducted in an unique stroke. The
@@ -19,3 +20,10 @@ aCanvas strokeWidth: 8 color: Color lightOrange fillColor: Color red do: [
       100@@0 . 140@@0 . 140@@100 . 240@@100 . 240@@140 .140@@140 .
       140@@240 . 100@@240 . 100@@140 . 0@@140 . 0@@100 . 100@@100 .
       100@@0 @} ]}
+
+@subheading @ref{medicCrossStep}
+To enjoy the update, the @msg{redrawNeeded} is to be sent to @smalltalk{self}.
+@smalltalkMethod{step,
+width := width + 0.1.
+width > 10 ifTrue: [width := 0].
+self redrawNeeded}

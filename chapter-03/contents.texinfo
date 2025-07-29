@@ -164,6 +164,22 @@ width := 0}
 @cindex morph @subentry step
 @cindex morph @subentry animation
 
-To make it pulse, we use the morphic's step mechanism.
+To pulse the cross, we use the morphic's step mechanism, generally
+involving 3 methods: in our @class{MedicCross} the @method{step}
+method is continuously executed at a period in milliseconds indicated
+by its @method{stepTime} method,
+
+@smalltalkMethod{CrossMedic >> stepTime,
+@return 10 }
+
+then, to indicate we want the stepping to occur, its
+@method{wantsSteps} must return @smalltalk{true},
+
+@smalltalkMethod{CrossMedic >> wantsSteps,
+@return true }
+
+@exercise{@method{step} method makes it pulse,medicCrossStep,
+Implement the @method{step} method in @class{MedicCross} so that its
+@smalltalk{width} increments by 0.1 until 10@comma{} then it is zeroed.}
 
 @figure{A flashing medic cross,ch03-medicCross,3}
