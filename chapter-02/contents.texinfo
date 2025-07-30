@@ -17,6 +17,7 @@ design is bullet proof tested by reusing it in an end-user
 * From where to start?::
 * Layout::
 * Scroll pane::
+* File Selector::
 @end menu
 
 

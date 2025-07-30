@@ -24,6 +24,43 @@ aCanvas strokeWidth: 8 color: Color lightOrange fillColor: Color red do: [
 @subheading @ref{medicCrossStep}
 To enjoy the update, the @msg{redrawNeeded} is to be sent to @smalltalk{self}.
 @smalltalkMethod{step,
-width := width + 0.1.
-width > 10 ifTrue: [width := 0].
+width := width + 0.2.
+width > 30 ifTrue: [width := 0].
 self redrawNeeded}
+
+@subheading @ref{avoidExpensiveCalculus}
+The principle is to handle @emph{manually} the indexes and to use the
+@method{timesRepeat:} method on integer. It reflects to how it will be
+coded with lower level languages.
+
+@smalltalkMethod{drawOn: canvas,
+| font grad posX extent step |
+../..
+step := self ppcm / 2. " half centimeter step "
+canvas strokeWidth: 0.8 color: Color black do: [
+   posX := 0.
+   width + 1 timesRepeat: [
+      canvas moveTo: posX @@ 0.5; lineToY: 10.
+      canvas moveTo: (posX + step) @@ 0.5 ; lineToY: 6.
+      posX := posX + self ppcm] ].
+
+grad := posX := 0.
+width + 1 timesRepeat: [
+   canvas drawString: grad asString
+      atCenterX: posX @@12 font: font color: Color black.
+   grad := grad + 1.
+   posX := posX + self ppcm]}
+
+@subheading @ref{millimeterRuler}
+We add the following code at the end of the method and make the stick
+thinner to 0.3 pixel.
+
+@smalltalkMethod{drawOn: canvas,
+step := self ppcm / 10. "millimeter step "
+canvas strokeWidth: 0.3 color: Color black do: [
+   posX := step.
+   width * 2 + 1 timesRepeat: [
+      4 timesRepeat: [
+         canvas moveTo: posX @ 0.2; lineToY: 4.
+         posX := posX + step].
+      posX := posX + step] ]}

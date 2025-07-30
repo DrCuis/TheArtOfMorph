@@ -9,6 +9,11 @@ with. This chapter will help you in that circumstances.
 As we did in the previous chapter, we take a look at existing morphs
 to learn from them, then we create our own morph.
 
+@menu
+* A bit of introspection::
+* Red to Medic cross::
+@end menu
+
 @cindex morph @subentry @method{drawOn:}
 @node A bit of introspection
 @section A bit of introspection
@@ -65,6 +70,9 @@ methods. The items at the top of the object explorer are with longer
 In this list, several items are @class{Sample***} classes, they are
 examples found in the @label{Morphic-Examples} class category. They
 demonstrate the capability of the @label{VectorGraphics} engine.
+
+@node Red to Medic cross
+@section Red to Medic cross
 
 Let's take a look at @class{Sample01Cross} and its unique
 @method{drawOn:} method:
@@ -173,13 +181,77 @@ by its @method{stepTime} method,
 @return 10 }
 
 then, to indicate we want the stepping to occur, its
-@method{wantsSteps} must return @smalltalk{true},
+@method{wantsSteps} method must return @smalltalk{true},
 
 @smalltalkMethod{CrossMedic >> wantsSteps,
 @return true }
 
 @exercise{@method{step} method makes it pulse,medicCrossStep,
 Implement the @method{step} method in @class{MedicCross} so that its
-@smalltalk{width} increments by 0.1 until 10@comma{} then it is zeroed.}
+@smalltalk{width} increments by 0.2 until 30@comma{} then it is zeroed.}
 
 @figure{A flashing medic cross,ch03-medicCross,3}
+
+In the next section we go a bit further by representing a real world
+object, a simple ruler.
+
+@node Ruler
+@section Ruler
+
+@cindex morph @subentry @class{PlacedMorph}
+Rulers come with different width, our morph ruler is a
+@class{PlacedMorph}@footnote{It can be grabbed and moved arround.}
+with a @smalltalk{width} attribute:
+
+@smalltalk{PlacedMorph subclass: #Ruler
+instanceVariableNames: 'width'
+classVariableNames: ''
+poolDictionaries: ''
+category: 'ArtOfMorph'}
+
+Our ruler is to be graduated with metric unit, so we define our scale
+between pixels and centimeters:
+
+@smalltalkMethod{ppcm,
+" pixels per cm "
+^ 50.0}
+
+To both ease reading of the graduations and to reveal as much as
+possible the visuals underneath the ruler, it is painted in plain
+color under the sticks and with transparency elsewhere.
+
+@smalltalkMethod{drawOn: canvas,
+| font extent |
+font := FontFamily familyName: FontFamily defaultFamilyName pointSize: 8.
+extent := width * self ppcm + (self ppcm / 2) @@ 60.
+	
+canvas fillRectangle: (-5 @@ 0 corner: extent x @@ 25) color: Color yellow.
+canvas fillRectangle: (-5 @@ 25 corner: extent) color: (Color yellow alpha: 0.5).
+canvas frameRectangle: (-5 @@ 0 corner: extent) borderWidth: 0.5
+   color: Color yellow muchDarker .
+
+canvas strokeWidth: 0.8 color: Color black do: [
+   0 to: width do: [:posX |
+      canvas moveTo: posX * self ppcm @ 0.5; lineToY: 10.
+      canvas moveTo: posX * self ppcm + (self ppcm / 2) @@ 0.5 ; lineToY: 6] ].
+
+0 to: width do: [:posX |
+   canvas drawString: posX asString
+      atCenterX: posX * self ppcm @@ 12 font: font color: Color black]}
+
+
+@exercise{Avoid expensive calculus,avoidExpensiveCalculus, The
+@method{drawOn:} method above is written to be compact and easy to
+read; however the method @method{ppcm} is used extensively to convert
+between centimeters and pixels@comma{} it implies numerous
+multiplications and some divisions. These operations are more
+expensive than additions. Rewrite @method{drawOn:} to avoid
+multiplication and division@comma{} particularly in loops.}
+
+
+@figure{Ruler with grad each centimeter,ch03-ruler1,7}
+
+
+@exercise{Millimeter graduation,millimeterRuler,Our ruler should be graduated each millimeter as show in the figure below. Extend the @method{drawOn:} to do so.}
+
+@figure{Ruler with a millimeter graduation,ch03-ruler2,7}

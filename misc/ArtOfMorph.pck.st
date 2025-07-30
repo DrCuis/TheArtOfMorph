@@ -1,6 +1,6 @@
-'From Cuis7.5 [latest update: #7387] on 29 July 2025 at 4:04:20 pm'!
+'From Cuis7.5 [latest update: #7387] on 30 July 2025 at 11:49:58 am'!
 'Description '!
-!provides: 'ArtOfMorph' 1 9!
+!provides: 'ArtOfMorph' 1 10!
 !requires: 'UI-Widgets' 1 54 nil!
 !requires: 'UI-Panel' 1 130 nil!
 SystemOrganization addCategory: #ArtOfMorph!
@@ -14,6 +14,16 @@ PlacedMorph subclass: #MedicCross
 	category: 'ArtOfMorph'!
 !classDefinition: 'MedicCross class' category: #ArtOfMorph!
 MedicCross class
+	instanceVariableNames: ''!
+
+!classDefinition: #Ruler category: #ArtOfMorph!
+PlacedMorph subclass: #Ruler
+	instanceVariableNames: 'width'
+	classVariableNames: ''
+	poolDictionaries: ''
+	category: 'ArtOfMorph'!
+!classDefinition: 'Ruler class' category: #ArtOfMorph!
+Ruler class
 	instanceVariableNames: ''!
 
 !classDefinition: #EllipseDemo category: #ArtOfMorph!
@@ -67,10 +77,10 @@ drawOn: aCanvas
 			140@240 . 100@240 . 100@140 . 0@140 . 	0@100 . 100@100.
 			100@0 } ].! !
 
-!MedicCross methodsFor: 'stepping' stamp: 'hlsf 7/29/2025 15:46:24'!
+!MedicCross methodsFor: 'stepping' stamp: 'hlsf 7/29/2025 22:42:13'!
 step
-	width := width + 0.1.
-	width > 10 ifTrue: [width := 0].
+	width := width + 0.2.
+	width > 30 ifTrue: [width := 0].
 	self redrawNeeded.! !
 
 !MedicCross methodsFor: 'stepping' stamp: 'hlsf 7/29/2025 15:46:34'!
@@ -80,6 +90,53 @@ stepTime
 !MedicCross methodsFor: 'stepping' stamp: 'hlsf 7/29/2025 15:52:40'!
 wantsSteps
 	^ true ! !
+
+!Ruler methodsFor: 'drawing' stamp: 'hlsf 7/30/2025 11:49:29'!
+drawOn: canvas
+	| font grad posX extent step |
+	font := FontFamily familyName: FontFamily defaultFamilyName pointSize: 8.
+	extent := width * self ppcm + (self ppcm / 2) @ 60.
+	
+	canvas fillRectangle: (-5@0 corner: extent x @ 25) color: (Color yellow alpha: 0.8).
+	canvas fillRectangle: (-5@25 corner: extent ) color: (Color yellow alpha: 0.4).
+	canvas frameRectangle: (-5@0 corner: extent) borderWidth: 0.5 color: Color yellow muchDarker .
+
+	step := self ppcm / 2. " half centimeter step "
+	canvas strokeWidth: 0.8 color: Color black do: [
+		posX := 0.
+		width + 1 timesRepeat: [
+			canvas moveTo: posX @ 0.5; lineToY: 10.
+			canvas moveTo: (posX  + step) @ 0.5 ; lineToY: 6.
+			posX := posX + self ppcm] ].
+
+	step := self ppcm / 10. "millimeter step "
+	canvas strokeWidth: 0.3 color: Color black do: [
+		posX := step.
+		width * 2 + 1 timesRepeat: [
+			4 timesRepeat: [
+				canvas moveTo: posX @ 0.2; lineToY: 4.
+				posX := posX + step].
+			posX := posX + step] ].
+	
+	grad := posX := 0.
+	width + 1 timesRepeat: [
+		canvas drawString: grad asString atCenterX: posX @12 font: font color: Color black.
+		grad := grad + 1.
+		posX := posX + self ppcm].! !
+
+!Ruler methodsFor: 'accessing' stamp: 'hlsf 7/30/2025 11:49:29'!
+ppcm
+" pixels per cm "
+	^ 50.0! !
+
+!Ruler methodsFor: 'initialization' stamp: 'hlsf 7/30/2025 11:49:29'!
+initialize
+	super initialize.
+	width := 10 "cm"! !
+
+!Ruler methodsFor: 'geometry' stamp: 'hlsf 7/30/2025 11:49:29'!
+rotationCenter
+	^ `0@0`! !
 
 !EllipseDemo methodsFor: 'accessing' stamp: 'hlsf 6/14/2025 12:17:51'!
 center
