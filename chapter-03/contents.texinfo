@@ -12,6 +12,7 @@ to learn from them, then we create our own morph.
 @menu
 * A bit of introspection::
 * Red to Medic cross::
+* Ruler::
 @end menu
 
 @cindex morph @subentry @method{drawOn:}
@@ -88,9 +89,10 @@ aCanvas strokeWidth: 8 color: Color lightOrange fillColor: Color red do: [
 
 @exercise{Better looking shape,improvedCross, Edit the
 @method{drawOn:} method to render a cross as shown in the image below
-(@ref{ch03-sampleStar2}).}
+(@ref{ch03-sampleStar2}).
+@figure{A better looking cross,ch03-sampleStar2,3} }
 
-@figure{A better looking cross,ch03-sampleStar2,3}
+
 
 @cindex morph @subentry @acronym{SVG}
 @cindex morph @subentry @class{AbstractVectorCanvas}
@@ -199,15 +201,15 @@ object, a simple ruler.
 @section Ruler
 
 @cindex morph @subentry @class{PlacedMorph}
-Rulers come with different width, our morph ruler is a
+Rulers come with different length, our morph ruler is a
 @class{PlacedMorph}@footnote{It can be grabbed and moved arround.}
-with a @smalltalk{width} attribute:
+with a @smalltalk{length} attribute:
 
-@smalltalk{PlacedMorph subclass: #Ruler
-instanceVariableNames: 'width'
-classVariableNames: ''
-poolDictionaries: ''
-category: 'ArtOfMorph'}
+@smalltalkExample{PlacedMorph subclass: #Ruler
+   instanceVariableNames: 'length'
+   classVariableNames: ''
+   poolDictionaries: ''
+   category: 'ArtOfMorph'}
 
 Our ruler is to be graduated with metric unit, so we define our scale
 between pixels and centimeters:
@@ -223,7 +225,7 @@ color under the sticks and with transparency elsewhere.
 @smalltalkMethod{drawOn: canvas,
 | font extent |
 font := FontFamily familyName: FontFamily defaultFamilyName pointSize: 8.
-extent := width * self ppcm + (self ppcm / 2) @@ 60.
+extent := length * self ppcm + (self ppcm / 2) @@ 60.
 	
 canvas fillRectangle: (-5 @@ 0 corner: extent x @@ 25) color: Color yellow.
 canvas fillRectangle: (-5 @@ 25 corner: extent) color: (Color yellow alpha: 0.5).
@@ -231,14 +233,24 @@ canvas frameRectangle: (-5 @@ 0 corner: extent) borderWidth: 0.5
    color: Color yellow muchDarker .
 
 canvas strokeWidth: 0.8 color: Color black do: [
-   0 to: width do: [:posX |
+   0 to: length do: [:posX |
       canvas moveTo: posX * self ppcm @ 0.5; lineToY: 10.
       canvas moveTo: posX * self ppcm + (self ppcm / 2) @@ 0.5 ; lineToY: 6] ].
 
-0 to: width do: [:posX |
+0 to: length do: [:posX |
    canvas drawString: posX asString
       atCenterX: posX * self ppcm @@ 12 font: font color: Color black]}
 
+
+@figure{Ruler with a centimeter graduation,ch03-ruler1,7}
+
+@cindex morph @subentry coordinates system
+When drawing, the coordinates we are using are always considered as
+part of a coordinates system specific to the morph we are drawing
+into. This makes the task both simple and powerful, we will be able to
+benefit from this feature to implement smart user interactions. In the
+method above, the zero on the ruler coincide with the origin in the
+morph coordinates system.
 
 @exercise{Avoid expensive calculus,avoidExpensiveCalculus, The
 @method{drawOn:} method above is written to be compact and easy to
@@ -248,10 +260,137 @@ multiplications and some divisions. These operations are more
 expensive than additions. Rewrite @method{drawOn:} to avoid
 multiplication and division@comma{} particularly in loops.}
 
-
-@figure{Ruler with grad each centimeter,ch03-ruler1,7}
-
-
-@exercise{Millimeter graduation,millimeterRuler,Our ruler should be graduated each millimeter as show in the figure below. Extend the @method{drawOn:} to do so.}
+@exercise{Millimeter graduation,millimeterRuler,Our ruler should be
+graduated each millimeter as shown in the figure below --
+@ref{ch03-ruler2}. Extend the @method{drawOn:} to do so.}
 
 @figure{Ruler with a millimeter graduation,ch03-ruler2,7}
+
+@cindex morph @subentry handle @subentry rotation
+Very likely, you already noticed the ruler can be dragged around. When
+activating its halo of handles -- @kbd{Alt-clic} or @kbd{middle-clic}
+-- it rotates with the blue handle at its left bottom position.
+
+@figure{Rotating the ruler with its handle,ch03-rulerCenter1,7}
+
+@cindex transformation @subentry rotation center
+As you experience it, it is rotated around the center of its
+bounding box. From the ruler inspector, interrogate the ruler about its
+center:
+
+@smalltalkExample{self rotationCenter
+@result{} 260.9997510912408 @@ 29.999971389797793}
+
+These coordinates are relative -- as always in the @cuis{} system --
+to the own ruler coordinates system. When pivoting the ruler, it will
+be more practical it rotates around its origin, this will ease doing
+measure on the screen. Hopefully it is easy to adjust it:
+
+@smalltalkMethod{Ruler >> rotationCenter,
+@return `0@@0`}
+
+It now rotates around this point!
+
+Using the halo handle to rotate the ruler is not very practical, we
+need a direct handle on the ruler to do so. In the next section, you
+will learn how to compose our morph designed from scratch with
+additional morphs.
+
+@node Composing
+@section Composing
+
+What we want is a direct handle on the ruler to rotate it. It is just
+a morph button to be inserted somewhere in the ruler, that's all we
+need to do.
+
+@smalltalkMethod{insertButtons,
+| btn |
+btn := ButtonMorph model: self action: #rotateRuler ::
+   actWhen: #buttonStillDown;
+   icon: Theme current refreshIcon;
+   color: Color transparent;
+   selectedColor: Color yellow darker;
+   morphExtent: Theme current refreshIcon extent * 1.5.
+self addMorph: btn.
+btn morphPosition: length * self ppcm @@ 30}
+
+@cindex morph @subentry owner
+
+The button morph added to the ruler is positioned according to the
+coordinates system of the ruler -- its @emph{owner}. Whenever it is
+scaled or rotated later with its halo handles, its sub-morphs -- here
+the buttons -- are positioned accordingly. We decide to place the
+button at the end of the ruler, it is more practical when pivoting the
+ruler. The button acts when the user keeps pressing the mouse button
+down, the method @smalltalk{rotateRuler} is then called.
+
+In this method we calculate the angle between two consecutive vectors
+going from the ruler rotation center to the mouse positions. As the
+mouse positions are in world coordinates, we ask for the ruler
+rotation center -- conceitedly also its origin -- to be converted in
+the world coordinates system.
+
+As we want both the angle and the direction of the user gesture --
+upward or downward -- we want a signed angle. We use the vector
+product@footnote{@url{https://en.wikipedia.org/wiki/Cross_product#Definition}}
+to deduce the angle to rotate the ruler accordingly.
+
+@smalltalkMethod{rotateRuler,
+| event p1 v1 v2|
+"any thing new to do?"
+event := self activeHand lastMouseEvent.
+event isMove 
+   ifTrue: [
+      p1 := self externalizeToWorld: self rotationCenter.
+      v1 := lastHandPosition - p1.
+      lastHandPosition := event eventPosition.
+      v2 := lastHandPosition - p1.
+      (v1 isZero or: [v2 isZero]) ifTrue: [@return{} self].
+      self rotateBy:  ((v1 crossProduct: v2) / (v1 r * v2 r)) arcSin ] 
+   ifFalse: [lastHandPosition := event eventPosition]}
+
+You may want to take a second look at this method, it is a bit complex
+at first, but it also expose the wonderful design of @cuis{}'s Morph 3
+to manage this kind of user interaction.
+
+@figure{A handy button to rotate the ruler,ch03-rulerRotateButton,7}
+
+Our next move is to give the ability to the user to change the length
+of her ruler, the @smalltalk{length} attribute. Therefore, we insert a
+second button to do so and in the process refactor the method:
+
+@smalltalkMethod{insertButtons,
+| btn buttonExtent |
+buttonExtent := Theme current refreshIcon extent * 1.5. 
+btn := ButtonMorph model: self action: #rotateRuler ::
+   actWhen: #buttonStillDown;
+   icon: Theme current refreshIcon;
+   color: Color transparent;
+   selectedColor: Color yellow darker;
+   morphExtent: buttonExtent.
+self addMorph: btn.
+btn := ButtonMorph model: self action: #resizeRuler ::
+   actWhen: #buttonStillDown;
+   icon: (Theme current fetch: #( '16x16' 'actions' 'go-last' ));
+   color: Color transparent;
+   selectedColor: Color yellow darker;
+   morphExtent: buttonExtent.
+self addMorph: btn.
+self positionningButtons }
+
+As the @smalltalk{length} will vary, so do the ruler morph width, it
+makes perfect sense to have a distinct method to put the buttons at
+the right place:
+
+@smalltalkMethod{positionningButtons,
+| buttonWidth position |
+buttonWidth := submorphs first morphWidth.
+position := length rounded * self ppcm -4 @@ 30.
+submorphs do: [:btn |
+   btn morphPosition: position.
+   position :=  position translatedBy: - 4 - buttonWidth @ 0 ]}
+
+Now the @method{resizeRuler} method to effectively change the length
+of the ruler looks a bit similar to @method{rotateRuler} in its
+general shape. But there are subtule differences to benefit from the
+Morph 3 design.
