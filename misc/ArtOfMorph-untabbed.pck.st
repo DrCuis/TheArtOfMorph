@@ -1,10 +1,30 @@
-'From Cuis7.5 [latest update: #7383] on 27 July 2025 at 6:09:55 pm'!
+'From Cuis7.5 [latest update: #7387] on 1 August 2025 at 12:00:33 am'!
 'Description '!
-!provides: 'ArtOfMorph' 1 7!
+!provides: 'ArtOfMorph' 1 12!
 !requires: 'UI-Widgets' 1 54 nil!
 !requires: 'UI-Panel' 1 130 nil!
 SystemOrganization addCategory: #ArtOfMorph!
 
+
+!classDefinition: #MedicCross category: #ArtOfMorph!
+PlacedMorph subclass: #MedicCross
+   instanceVariableNames: 'width'
+   classVariableNames: ''
+   poolDictionaries: ''
+   category: 'ArtOfMorph'!
+!classDefinition: 'MedicCross class' category: #ArtOfMorph!
+MedicCross class
+   instanceVariableNames: ''!
+
+!classDefinition: #Ruler category: #ArtOfMorph!
+PlacedMorph subclass: #Ruler
+   instanceVariableNames: 'length lastHandPosition font'
+   classVariableNames: ''
+   poolDictionaries: ''
+   category: 'ArtOfMorph'!
+!classDefinition: 'Ruler class' category: #ArtOfMorph!
+Ruler class
+   instanceVariableNames: ''!
 
 !classDefinition: #EllipseDemo category: #ArtOfMorph!
 ColoredBoxMorph subclass: #EllipseDemo
@@ -36,6 +56,153 @@ FlowLayoutMorph subclass: #FileSelectorPane
 FileSelectorPane class
    instanceVariableNames: ''!
 
+
+!MedicCross commentStamp: 'hlsf 7/29/2025 15:53:25' prior: 0!
+A flashing medical cross
+
+   MedicCross new openInHand
+
+!
+
+!MedicCross methodsFor: 'initialization' stamp: 'hlsf 7/29/2025 15:52:21'!
+initialize
+   super initialize.
+   width := 0! !
+
+!MedicCross methodsFor: 'drawing' stamp: 'hlsf 7/29/2025 15:53:09'!
+drawOn: aCanvas
+   aCanvas strokeWidth: width color: Color green lighter fillColor: Color green do: [
+      aCanvas polyLine: {
+         100@0 .   140@0 .   140@100 . 240@100 . 240@140 .140@140 .
+         140@240 . 100@240 . 100@140 . 0@140 .    0@100 . 100@100.
+         100@0 } ].! !
+
+!MedicCross methodsFor: 'stepping' stamp: 'hlsf 7/29/2025 22:42:13'!
+step
+   width := width + 0.2.
+   width > 30 ifTrue: [width := 0].
+   self redrawNeeded.! !
+
+!MedicCross methodsFor: 'stepping' stamp: 'hlsf 7/29/2025 15:46:34'!
+stepTime
+   ^ 10 ! !
+
+!MedicCross methodsFor: 'stepping' stamp: 'hlsf 7/29/2025 15:52:40'!
+wantsSteps
+   ^ true ! !
+
+!Ruler methodsFor: 'drawing' stamp: 'hlsf 7/31/2025 23:59:02'!
+drawOn: canvas
+   | grad posX extent step roundedLength |
+   roundedLength := length rounded.
+   extent := roundedLength * self ppcm + (self ppcm / 2) @ 60.
+   
+   canvas fillRectangle: (-5@0 corner: extent x @ 25) color: Color yellow.
+   canvas fillRectangle: (-5@25 corner: extent ) color: (Color yellow alpha: 0.5).
+   canvas frameRectangle: (-5@0 corner: extent) borderWidth: 0.5 color: Color yellow muchDarker .
+
+   step :=  self ppcm / 2. " half centimeter step "
+   canvas strokeWidth: 0.8 color: Color black do: [
+      posX := 0.
+      roundedLength + 1 timesRepeat: [
+         canvas moveTo: posX @ 0.5; lineToY: 10.
+         canvas moveTo: (posX  + step) @ 0.5 ; lineToY: 6.
+         posX := posX + self ppcm] ].
+
+   step := self ppcm / 10. "millimeter step "
+   canvas strokeWidth: 0.3 color: Color black do: [
+      posX := step.
+      roundedLength * 2 + 1 timesRepeat: [
+         4 timesRepeat: [
+            canvas moveTo: posX @ 0.2; lineToY: 4.
+            posX := posX + step].
+         posX := posX + step] ].
+
+   grad := posX := 0.
+   roundedLength + 1 timesRepeat: [
+      canvas drawString: grad asString atCenterX: posX @12 font: font color: Color black.
+      grad := grad + 1.
+      posX := posX + self ppcm].! !
+
+!Ruler methodsFor: 'accessing' stamp: 'hlsf 7/31/2025 23:53:55'!
+length: newLength
+   length := newLength max: 1.
+   self positioningButtons.
+   self redrawNeeded ! !
+
+!Ruler methodsFor: 'accessing' stamp: 'hlsf 7/31/2025 18:34:21'!
+ppcm
+" pixels per cm "
+   ^ 50.0! !
+
+!Ruler methodsFor: 'initialization' stamp: 'hlsf 7/31/2025 23:57:21'!
+initialize
+   super initialize.
+   font := FontFamily familyName: FontFamily defaultFamilyName pointSize: 8.
+   length := 10 "cm".
+   self insertButtons ! !
+
+!Ruler methodsFor: 'initialization' stamp: 'hlsf 7/31/2025 20:28:28'!
+insertButtons
+| btn buttonExtent |
+   buttonExtent := Theme current refreshIcon extent * 1.5. 
+   btn := ButtonMorph model: self action: #rotateRuler ::
+      actWhen: #buttonStillDown;
+      icon: Theme current refreshIcon;
+      color: Color transparent;
+      selectedColor: Color yellow darker;
+      morphExtent: buttonExtent.
+   self addMorph: btn.
+   btn := ButtonMorph model: self action: #resizeRuler ::
+      actWhen: #buttonStillDown;
+      icon: (Theme current fetch: #( '16x16' 'actions' 'go-last' ));
+      color: Color transparent;
+      selectedColor: Color yellow darker;
+      morphExtent: buttonExtent.
+   self addMorph: btn.
+   self positioningButtons 
+   ! !
+
+!Ruler methodsFor: 'initialization' stamp: 'hlsf 7/31/2025 20:28:28'!
+positioningButtons
+| buttonWidth position |
+   buttonWidth := submorphs first morphWidth.
+   position := length rounded * self ppcm -4 @ 30.
+   submorphs do: [:btn |
+      btn morphPosition: position.
+      position :=  position translatedBy:  - 4 - buttonWidth @ 0 ]
+      ! !
+
+!Ruler methodsFor: 'geometry' stamp: 'hlsf 7/31/2025 14:36:31'!
+rotationCenter
+   ^ `0@0`! !
+
+!Ruler methodsFor: 'as yet unclassified' stamp: 'hlsf 7/31/2025 23:29:50'!
+resizeRuler
+   | event prev |
+   "any thing new to do?"
+   event := self activeHand lastMouseEvent.
+   event isMove 
+      ifTrue: [
+         prev := lastHandPosition.
+         lastHandPosition := self internalizeFromWorld: event eventPosition.
+         self length: length + (lastHandPosition x - prev x / self ppcm)] 
+      ifFalse: [   lastHandPosition := self internalizeFromWorld: event eventPosition].! !
+
+!Ruler methodsFor: 'as yet unclassified' stamp: 'hlsf 7/31/2025 23:29:57'!
+rotateRuler
+   | event p1 v1 v2|
+   "any thing new to do?"
+   event := self activeHand lastMouseEvent.
+   event isMove 
+      ifTrue: [
+         p1 := self externalizeToWorld: self rotationCenter.
+         v1 := lastHandPosition - p1.
+         lastHandPosition := event eventPosition.
+         v2 := lastHandPosition - p1.
+         (v1 isZero or: [v2 isZero]) ifTrue: [^self].
+         self rotateBy:  ((v1 crossProduct: v2) / (v1 r * v2 r)) arcSin   ] 
+      ifFalse: [   lastHandPosition := event eventPosition].! !
 
 !EllipseDemo methodsFor: 'accessing' stamp: 'hlsf 6/14/2025 12:17:51'!
 center
@@ -180,7 +347,7 @@ toggleFileBrowser
 
    ! !
 
-!FileRequestMorph methodsFor: 'events' stamp: 'hlsf 7/27/2025 14:42:52'!
+!FileRequestMorph methodsFor: 'events' stamp: 'hlsf 7/29/2025 10:48:13'!
 entry: anEntry
    textMorph hasUnacceptedEdits: false.
    response := anEntry asString.
@@ -190,6 +357,11 @@ entry: anEntry
 !FileRequestMorph methodsFor: 'private' stamp: 'hlsf 7/27/2025 12:50:16'!
 cancel
    super cancel.
+   fileBrowser ifNotNil: [fileBrowser delete]! !
+
+!FileRequestMorph methodsFor: 'private' stamp: 'jmv 7/28/2025 14:40:16'!
+ok
+   self delete.
    fileBrowser ifNotNil: [fileBrowser delete]! !
 
 !FileRequestMorph class methodsFor: 'as yet unclassified' stamp: 'hlsf 7/27/2025 18:09:49'!
@@ -203,13 +375,17 @@ example
       orCancel: nil.
 ! !
 
+!FileRequestMorph class methodsFor: 'instance creation' stamp: 'hlsf 7/29/2025 10:54:20'!
+request: queryString
+   ^ self request: queryString initialAnswer: DirectoryEntry userBaseDirectory asString! !
+
 !FileSelectorPane methodsFor: 'initialization' stamp: 'hlsf 7/19/2025 13:26:16'!
 initialize
    super initialize.
    self open: DirectoryEntry userBaseDirectory
    ! !
 
-!FileSelectorPane methodsFor: 'private' stamp: 'hlsf 7/27/2025 17:56:30'!
+!FileSelectorPane methodsFor: 'private' stamp: 'hlsf 7/28/2025 23:53:42'!
 entryPreviewFor: fileEntry
    | fileView |
    fileView := FilePreviewMorph 
@@ -218,7 +394,7 @@ entryPreviewFor: fileEntry
          ifTrue: [Theme current genericTextIcon] 
          ifFalse: [Theme current fetch: #( '16x16' 'places' 'folder' )]) magnifyTo: 64@64)
       buttons: nil
-      label: fileEntry baseName ::
+      label: (fileEntry isRoot ifTrue:['/'] ifFalse: [fileEntry baseName]) ::
       borderColor: Color transparent;
       color: Color transparent.
    fileEntry isDirectoryEntry ifTrue: [
@@ -231,12 +407,10 @@ previewsFor: entries
    ^ (entries sort: [:a :b | a baseName asUppercase < b baseName asUppercase ]) collect: [:anEntry | 
       self entryPreviewFor: anEntry]! !
 
-!FileSelectorPane methodsFor: 'accessing' stamp: 'hlsf 7/27/2025 11:58:21'!
-open: aDirectoryEntryorPreview
+!FileSelectorPane methodsFor: 'accessing' stamp: 'hlsf 7/29/2025 10:48:53'!
+open: aDirectoryEntry
    | entryViews |
-   model := aDirectoryEntryorPreview class = FilePreviewMorph 
-      ifTrue: [aDirectoryEntryorPreview fileEntry]
-      ifFalse: [aDirectoryEntryorPreview ].
+   model := aDirectoryEntry.
    entryViews := OrderedCollection new.
    model isRoot ifFalse: [ | parentView |
       parentView := self entryPreviewFor: model parent.

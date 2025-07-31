@@ -324,11 +324,13 @@ button at the end of the ruler, it is more practical when pivoting the
 ruler. The button acts when the user keeps pressing the mouse button
 down, the method @smalltalk{rotateRuler} is then called.
 
+@cindex morph @subentry coordinates system @subentry conversion
 In this method we calculate the angle between two consecutive vectors
 going from the ruler rotation center to the mouse positions. As the
 mouse positions are in world coordinates, we ask for the ruler
 rotation center -- conceitedly also its origin -- to be converted in
-the world coordinates system.
+the world coordinates system -- @smalltalk{self externalizeToWorld:
+self rotationCenter}.
 
 As we want both the angle and the direction of the user gesture --
 upward or downward -- we want a signed angle. We use the vector
@@ -376,21 +378,68 @@ btn := ButtonMorph model: self action: #resizeRuler ::
    selectedColor: Color yellow darker;
    morphExtent: buttonExtent.
 self addMorph: btn.
-self positionningButtons }
+self positioningButtons }
 
 As the @smalltalk{length} will vary, so do the ruler morph width, it
 makes perfect sense to have a distinct method to put the buttons at
 the right place:
 
-@smalltalkMethod{positionningButtons,
+@smalltalkMethod{positioningButtons,
 | buttonWidth position |
 buttonWidth := submorphs first morphWidth.
 position := length rounded * self ppcm -4 @@ 30.
 submorphs do: [:btn |
    btn morphPosition: position.
-   position :=  position translatedBy: - 4 - buttonWidth @ 0 ]}
+   position :=  position translatedBy: - 4 - buttonWidth @@ 0 ]}
 
 Now the @method{resizeRuler} method to effectively change the length
 of the ruler looks a bit similar to @method{rotateRuler} in its
 general shape. But there are subtule differences to benefit from the
 Morph 3 design.
+
+@smalltalkMethod{resizeRuler,
+| event prev |
+"any thing new to do?"
+event := self activeHand lastMouseEvent.
+event isMove 
+   ifTrue: [
+      prev := lastHandPosition.
+      lastHandPosition := self internalizeFromWorld: event eventPosition.
+      self length: length + (lastHandPosition x - prev x / self ppcm)] 
+   ifFalse: [lastHandPosition := self internalizeFromWorld: event eventPosition]}
+
+@cindex morph @subentry coordinates system @subentry conversion
+
+When the user keeps pressing the resize button, the ruler should
+shrink when the mouse pointer moves in direction of the smallest value
+of the ruler x-axis and its length should increase when the mouse
+pointer moves in direction of the greatest value of its x-axis.
+
+To be able to determine these behaviors of the mouse pointer, the
+coordinates involved must be converted in the ruler coordinates
+system. This is exactly what is done by internalizing the mouse
+position @smalltalk{self internalizeFromWorld: event
+eventPosition}. Then the abscissa delta between the two last mouse
+positions is calculated to determine the change to the ruler length.
+And because we are doing this calculus in the ruler coordinates
+system, it works whatever its pivoted state.
+
+@figure{A handy button to resize the ruler,ch03-rulerResizeButton,4}
+
+Of course, when the length is adjusted, the positions of the buttons
+is recomputed as the whole ruler:
+
+@smalltalkMethod{length: newLength,
+length := newLength max: 1.
+self positioningButtons.
+self redrawNeeded }
+
+Because the @method{drawOn:} expected an integer value for the
+@smalltalk{length}, its value is rounded before doing the drawing:
+
+@smalltalkMethod{drawOn: canvas,
+| font grad posX extent step roundedLength |
+font := FontFamily familyName: FontFamily defaultFamilyName pointSize: 8.
+roundedLength := length rounded.
+extent := roundedLength * self ppcm + (self ppcm / 2) @@ 60.
+../..}
