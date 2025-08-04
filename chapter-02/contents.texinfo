@@ -21,7 +21,7 @@ design is rigorously tested by reusing it in an end-user @acronym{GUI}.
 
 
 @cindex morph @subentry subclasses
-@node From here to start?
+@node From where to start?
 @section From Where to Start?
 
 Design by reuse indeed, but from where to start? Which classes should
