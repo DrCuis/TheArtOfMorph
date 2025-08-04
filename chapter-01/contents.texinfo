@@ -15,17 +15,16 @@ aggregate of existing Morphs, a design from scratch or a combination
 of the two former approaches.
 
 Building a new Morph with an aggregate of existing Morphs is mainly
-about laying out together Morphs and let the aggregated Morphs manage
-the low level drawings and input event operations. When there is a
-need for a custom Morph, this is the path to investigate first; if
-there is no way to do so, then consider designing from scratch a
-Morph.
+about laying out Morphs together and letting the aggregated Morphs manage
+the low-level drawings and input event operations. When there is a need
+for a custom Morph, this is the path to investigate first. If there is no
+way to do so, then consider designing a Morph from scratch.
 
-Designing from scratch a Morph requires to deal with its appearance
-and the handling of the input events; for the former, Cuis offers a
-vector graphics anti-aliased canvas, the latter is done with a
-mechanism to filter and to handle mouse and keyboard events occurring
-in the scope of the custom Morph.
+Designing a Morph from scratch requires dealing with its appearance and
+the handling of input events. For the former, Cuis offers a vector
+graphics anti-aliased canvas; the latter is done with a mechanism to
+filter and handle mouse and keyboard events occurring in the scope of
+the custom Morph.
 
 Let's start right away with a design from scratch.
 
@@ -36,10 +35,11 @@ Let's start right away with a design from scratch.
 @end menu
 
 @node A first glimpse
-@section A first glimpse
-It's easy to create custom morphs. Just create a subclass of an
-existing morph class. Then implement the @method{drawOn:} method or
-add and layout sub morphs.
+@section A First Glimpse
+
+It's easy to create custom morphs. Just create a subclass of an existing
+morph class. Then implement the @method{drawOn:} method or add and layout
+sub-morphs.
 
 Let's make an example that draws an ellipse. Making it a subclass of
 @class{BoxMorph} gives it an @smalltalk{extent} instance variable
@@ -51,23 +51,22 @@ which specifies its width and height.
    poolDictionaries: ''
    category: 'ArtOfMorph'}
 
-We adjust its default extent@footnote{Observe the backtricks to
-improve performance at execution.}:
+We adjust its default extent@footnote{Observe the backticks to improve
+performance at execution.}:
 
 @smalltalkMethod{defaultExtent,
 @return{} `200@@200`}
 
-In our @class{EllipseDemo}, the @smalltalk{extent} represents the
-lengths of the ox and oy axis of the ellipse. We use it to draw it
-accordingly:
+In our @class{EllipseDemo}, the @smalltalk{extent} represents the lengths
+of the ox and oy axes of the ellipse. We use it to draw it accordingly:
 
 @smalltalkMethod{drawOn: aCanvas,
 | radius |
 radius := extent / 2.0.
 aCanvas fillColor: Color purple do: [
    aCanvas ellipseCenter: radius radius: radius]}
-   
-Finally, we instruct @cuis{} we want to use the Vector Graphic engine:
+
+Finally, we instruct @cuis{} that we want to use the Vector Graphic engine:
 
 @smalltalkMethod{requiresVectorCanvas,
 @return{} true}
@@ -75,24 +74,23 @@ Finally, we instruct @cuis{} we want to use the Vector Graphic engine:
 To display an instance of @class{EllipseDemo}, open a Workspace and
 execute @smalltalk{EllipseDemo new openInWorld}.
 
-@figure{Ellipse with axes@comma{} resized to an extent approximatively
-equals to 300@@100,ch01-EllipseDemo-Axes,5}
+@figure{Ellipse with axes@comma{} resized to an extent approximately equals to
+300@@100,ch01-EllipseDemo-Axes,5}
 
-@cuisNote{The drawing always operates in the own morph
-coordinates system and we have to ensure our drawing operations remain
-in the bond defined by the morph origin, in the top-left corner, and
-its bottom-right corner delimited by its @smalltalk{extent} attribute,
-a point.}
+@cuisNote{The drawing always operates in the morph's own coordinates system,
+and we have to ensure our drawing operations remain within the bounds
+defined by the morph origin, in the top-left corner, and its bottom-right
+corner delimited by its @smalltalk{extent} attribute, a point.}
 
-Before proceeding forward with events, we may want to add semantic to
-our protocol with @msg{center} and @msg{semiAxises} messages to use within
-the @method{drawOn:} method:
+Before proceeding with events, we may want to add semantics to our protocol
+with @msg{center} and @msg{semiAxises} messages to use within the
+@method{drawOn:} method:
 
 @smalltalkMethod{center,
 @return{} extent / 2.0}
 
 @smalltalkMethod{semiAxises,
-" the semi minor and major axis of the ellipse"
+" the semi minor and major axes of the ellipse"
 @return{} extent / 2.0}
 
 @smalltalkMethod{drawOn: aCanvas,
@@ -101,12 +99,15 @@ aCanvas fillColor: Color purple do: [
 
 @cindex event @subentry mouse
 @node Mouse event
-@section Mouse event
-Let's explore how custom morphs can react to mouse clicks, mouse
-hovers, and keystrokes.
+@section Mouse Event
+
+Let's explore how custom morphs can react to mouse clicks, mouse hovers,
+and keystrokes.
 
 @cindex event @subentry mouse @subentry click
-@subsection Mouse click
+
+@subsection Mouse Click
+
 Here is a modification of our previous example whose color toggles
 between red and green each time it is clicked.
 
@@ -125,20 +126,20 @@ Then we initialize it with the red color:
 super initialize.
 color := Color red}
 
-First, we request we want to handle the mouse click down event:
+First, we request that we want to handle the mouse click down event:
 
 @smalltalkMethod{handlesMouseDown: aMouseEvent,
 "This enables the morph to handle mouse events such as button presses."
 @return{} true}
 
-Then at each mouse click, we toggle the @smalltalk{color} attribute
-between red and greed:
+Then, at each mouse click, we toggle the @smalltalk{color} attribute
+between red and green:
 
 @smalltalkMethod{mouseButton1Down: aMouseEvent localPosition: aPosition,
 color := (color = `Color red`) ifTrue: [`Color green`] ifFalse: [`Color red`].
 self redrawNeeded}
 
-Of course we adjust the drawing method to use the @smalltalk{color}
+Of course, we adjust the drawing method to use the @smalltalk{color}
 attribute:
 
 @smalltalkMethod{drawOn: aCanvas,
@@ -148,29 +149,29 @@ aCanvas fillColor: color do: [
 To render this, open a Workspace and evaluate @smalltalk{EllipseDemo
 new openInWorld}. Click the circle several times to toggle its color.
 
-
 @cindex event @subentry mouse @subentry hovering
-@subsection Mouse hovering
+
+@subsection Mouse Hovering
 
 Now let's modify our @class{EllipseDemo} to toggle its color based on
 whether the mouse cursor is hovering over it.
 
-This time, we want to handle event when the mouse pointer is hovering
-our @class{EllipseMorph}:
+This time, we want to handle events when the mouse pointer is hovering
+over our @class{EllipseMorph}:
 
 @smalltalkMethod{handlesMouseOver: aMouseEvent,
 "This enables the morph to handle mouse enter and leave events."
 @return{} true}
 
-Of course we remove the @smalltalk{handlesMouseDown:} method, or
-alternatively we edit it so it return @smalltalk{false}, to let
-@cuis{} handles this event:
+Of course, we remove the @smalltalk{handlesMouseDown:} method, or
+alternatively, we edit it so it returns @smalltalk{false}, to let
+@cuis{} handle this event:
 
 @smalltalkMethod{handlesMouseDown: aMouseEvent,
 "This enables the morph to handle mouse events such as button presses."
 @return{} false}
 
-There are two event handlers associated when handling mouse over: when
+There are two event handlers associated with handling mouse over: when
 entering and when leaving a morph. We edit the methods accordingly to
 toggle the morph color:
 
@@ -182,59 +183,63 @@ self redrawNeeded}
 color := `Color red`.
 self redrawNeeded}
 
-Create an instance as seen previously, the hover onto and off of the
+Create an instance as seen previously, then hover onto and off the
 ellipse to toggle its color.
 
 Observe how the frontier between inside and outside of the ellipse is
-a rectangle, this is because our @class{EllipseDemo} is a kind of
-@class{BoxMorph} optimised for rectangular shape. To have exact pixel
-detection, including shape drawn with holes, our @class{EllipseDemo}
-would require to be a direct subclass of @class{PlacedMorph}. In the
+a rectangle. This is because our @class{EllipseDemo} is a kind of
+@class{BoxMorph} optimized for rectangular shapes. To have exact pixel
+detection, including shapes drawn with holes, our @class{EllipseDemo}
+would require being a direct subclass of @class{PlacedMorph}. In the
 process, we will lose the @smalltalk{extent} and @smalltalk{color}
-attributes, and we will have to define ones of our own.
+attributes and will have to define our own.
+
+@subsection Grow on User Request
 
 @subsection Grow on user request
 Now let's combine the mouse hover and mouse click events: at button 1
 click, the ellipse shrinks slightly; at button 2 click, it grows
 greatly.
 
-To do so we introduce a @smalltalk{shrink} attribute initialized to 0:
+To do so, we introduce a @smalltalk{shrink} attribute initialized to 0:
 
 @smalltalkMethod{initialize,
 super initialize.
 color := Color red.
 shrink := 0}
 
-Then it changes depending on user actions, its value increase slightly
+Then it changes depending on user actions; its value increases slightly
 at button 1 click:
 
 @smalltalkMethod{mouseButton1Down: aMouseEvent localPosition: aPosition,
 shrink := (shrink + 0.5) min: (extent x min: extent y) // 2.
 self redrawNeeded}
 
-and decrease quickly at button 2 click,
+and decreases quickly at button 2 click:
 
 @smalltalkMethod{mouseButton2Down: aMouseEvent localPosition: aPosition,
 shrink := (shrink - 5) max: 0.
 self redrawNeeded}
 
-Of course we have to bound the @smalltalk{shrink} attribute between 0
+Of course, we have to bound the @smalltalk{shrink} attribute between 0
 and the smaller extent axis of the whole morph.
 
-Then we adjust our @method{semiAxies} method used to draw the ellipse:
+Then we adjust our @method{semiAxises} method used to draw the ellipse:
 
 @smalltalkMethod{semiAxises,
 @return{}  (extent / 2.0) - shrink}
 
 @node Keyboard event
 @cindex event @subentry keyboard
-@section Keyboard event
-So far, we explored how a morph interacts with the mouse pointer, it
-may also respond to keyboard events. In this section, we modify our
+
+@section Keyboard Event
+
+So far, we have explored how a morph interacts with the mouse pointer.
+It may also respond to keyboard events. In this section, we modify our
 @class{EllipseDemo} to adjust its color at keyboard interaction.
 
-First, identically to mouse event, we indicate our morph want to
-handle keyboard event:
+First, identically to mouse events, we indicate our morph wants to
+handle keyboard events:
 
 @smalltalkMethod{handlesKeyboard,
 "This enables the morph to handle key events if it has focus."
@@ -243,30 +248,32 @@ handle keyboard event:
 We handle the keyboard event only when our morph is visible.
 
 @cindex event @subentry keyboard focus
-Keyboard event is associated with the concept of keyboard focus. In
-the world of morph, one or zero morph own the keyboard focus at a
-time, it means this morph will receive the keyboard event.
+
+Keyboard events are associated with the concept of keyboard focus. In
+the world of morphs, one or zero morph own the keyboard focus at a
+time, meaning this morph will receive the keyboard event.
 
 @cindex preference @subentry keyboard focus
-Moreover, in @cuis{} there is this preference
-@smalltalk{#focusFollowsMouse}. When true, the keyboard focus is
-automatically changed to the morph the mouse pointer is hovering; when
-false, the keyboard focus is only changed to a morph at user mouse
-click on this specific morph.
 
-To know what is the preference in your @cuis{} system, execute the code:
+Moreover, in @cuis{} there is a preference
+@smalltalk{#focusFollowsMouse}. When true, the keyboard focus is
+automatically changed to the morph the mouse pointer is hovering over.
+When false, the keyboard focus is only changed to a morph at a user
+mouse click on this specific morph.
+
+To know what the preference is in your @cuis{} system, execute the code:
 
 @smalltalkExample{Preferences at: #focusFollowsMouse
 @result{} true}
 
 I personally prefer to explicitly inform the @cuis{} system where the
 keyboard focus should go. Indeed, my mouse tends to slip on my desk,
-resulting on the keyboard focus to change annoyingly:
+resulting in the keyboard focus changing annoyingly:
 
 @smalltalkExample{Preferences at: #focusFollowsMouse put: false}
 
-Our @class{EllipseDemo} honors this  preference when the mouse pointer
-enter the morph:
+Our @class{EllipseDemo} honors this preference when the mouse pointer
+enters the morph:
 
 @smalltalkMethod{mouseEnter: aMouseEvent,
 color := `Color green`.
@@ -277,10 +284,10 @@ the cursor (event hand) to give focus to this morph."
 self redrawNeeded}
 
 The @emph{hand} is the mouse pointer object in the @cuis{}
-terminology. It manages the keyboard focus and it is informed when the
+terminology. It manages the keyboard focus and is informed when the
 focus should be affected to another morph.
 
-When the mouse pointer leaves our morph we let its parent morph manages
+When the mouse pointer leaves our morph, we let its parent morph manage
 the focus:
 
 @smalltalkMethod{mouseLeave: aMouseEvent,
@@ -288,7 +295,7 @@ super mouseLeave: aMouseEvent.
 color := `Color red`.
 self redrawNeeded}
 
-accordingly to the @smalltalk{#focusFollowsMouse} system preference:
+according to the @smalltalk{#focusFollowsMouse} system preference:
 
 @smalltalkMethod{Morph>>mouseLeave: evt,
 (Preferences at: #focusFollowsMouse)
@@ -299,7 +306,7 @@ accordingly to the @smalltalk{#focusFollowsMouse} system preference:
 
 To handle the keyboard strokes, we override the dedicated method
 @method{keyStroke:}. We first ensure the key stroke was not handled by
-the parent@footnote{For example, to manage keyboard shortcut or
+the parent@footnote{For example, to manage keyboard shortcuts or
 tabulation.} then we do the handling specific to our
 @class{EllipseDemo} morph:
 
@@ -328,11 +335,10 @@ implement the following features:
 
 @itemize
 @item
-Pressing @kbd{h}, @kbd{s} or @kbd{v} increase, respectively, the hue,
-the saturation and the brightness of the ellipse color.
-
+Pressing @kbd{h}, @kbd{s}, or @kbd{v} increases, respectively, the hue,
+the saturation, and the brightness of the ellipse color.
 @item
-Pressing @kbd{Ctrl-h}, @kbd{Ctrl-s} or @kbd{Ctrl-v} decrease these same values.
+Pressing @kbd{Ctrl-h}, @kbd{Ctrl-s}, or @kbd{Ctrl-v} decreases these same values.
 @end itemize
 
 @smalltalkMethod{keyStroke: aKeyEvent,
@@ -351,8 +357,8 @@ character
 color setHue: h saturation: s brightness: v.
 self redrawNeeded}
 
-Our gentle introduction ends here, we have exposed several facets of
-the Morph system to build from scratch your own morph: drawing of the
+Our gentle introduction ends here. We have exposed several facets of
+the Morph system to build your own morph from scratch: drawing of the
 morph and handling of the mouse and keyboard input. In the following
-chapters we explore more in detail the design from scratch of your own
-morphs and how to combine them with existing morph.
+chapters, we explore in more detail the design from scratch of your own
+morphs and how to combine them with existing morphs.

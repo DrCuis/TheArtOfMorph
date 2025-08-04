@@ -1,17 +1,15 @@
 @node Design by reuse
-@chapter Design by reuse
+@chapter Design by Reuse
 
 @*
 
 In this chapter you will learn how to design new morph -- in the idea
 of a new widget -- by assembling existing ones. We first illustrate
 the topic with existing morphs from the @cuis{} system and the
-@label{Cuis-Smalltalk-UI} repository. Then we dive-in the design of a
+@label{Cuis-Smalltalk-UI} repository. Then, we dive into the design of a
 new morph -- a file selector -- gradually improving it from a quick
 design in a @label{Workspace} to a class of its own. Finally, its
-design is bullet proof tested by reusing it in an end-user
-@acronym{GUI}.
-
+design is rigorously tested by reusing it in an end-user @acronym{GUI}.
 
 @menu
 * From where to start?::
@@ -23,8 +21,8 @@ design is bullet proof tested by reusing it in an end-user
 
 
 @cindex morph @subentry subclasses
-@node From where to start?
-@section From where to start?
+@node From here to start?
+@section From Where to Start?
 
 Design by reuse indeed, but from where to start? Which classes should
 we make reuse from? As often, the @cuis{} system may be our best
@@ -40,33 +38,34 @@ hallOfFame @assign{} hallOfFame sort: [:array1 :array2 | array1 second > array2 
 
 @figure{The hall of fame of morph subclasses count,ch02-hallOfFame,6}
 
-Let's analyze some top ranked morphs:
+Let's analyze some top-ranked morphs:
 
 @enumerate
 @item
 @class{PlacedMorph}. Its subclasses need to override the
-@method{drawOn:} method. So not a candidate to design morph by reuse.
+@method{drawOn:} method, so it's not a candidate for designing morphs
+by reuse.
 
 @item
-@class{BorderedMorph}, @class{ColoredBoxMorph} and
-@class{BoxMorph}. Those classes are @class{PlacedMorph} with a few
-additional characteristics. Subclassing these classes will require
-most of the time overriding the @method{drawOn:} method.
+@class{BorderedMorph}, @class{ColoredBoxMorph}, and @class{BoxMorph}.
+These classes are @class{PlacedMorph} with a few additional
+characteristics. Subclassing these classes will most of the time
+require overriding the @method{drawOn:} method.
 
 @item
 @class{LinearLayoutMorph}. It has 11 subclasses. It is designed to
-assemble morphs in a new morph, using this class for reuse makes
-perfectly sense and we already know how to use it.
+assemble morphs in a new morph. Using this class for reuse makes
+perfect sense, and we already know how to use it.
 
 @item
 @class{SystemWindow}. As a view representing a whole application,
-subclassing it makes sense to implement specific behaviors of one GUI
-application, but not as a morph you can reuse as a widget. 
+subclassing it makes sense to implement specific behaviors of a GUI
+application, but not as a morph you can reuse as a widget.
 
 @cindex morph @subentry @class{PluggableMorph}
 @item
-@class{PluggableMorph}. It seems very generic, may be a good
-candidate. It represents a view of an associated model, however its
+@class{PluggableMorph}. It seems very generic and may be a good
+candidate. It represents a view of an associated model. However, its
 subclasses need to implement a specific @method{drawOn:} method. We
 may want to use it when designing a morph from scratch.
 
@@ -85,21 +84,22 @@ by reuse: @class{LinearLayoutMorph} and @class{PluggableScrollPane}.
 @cindex morph @subentry layout
 @node Layout
 @section Layout
-This section will be very familliar with the booklet @emph{Design GUI
+
+This section will be very familiar with the booklet @emph{Design GUI
 with Morph}, and it is a good idea to read its @url{Layout
 components,https://DrCuis.github.io/DesignGUI/Layout-components.html}
-chapter before.
+chapter beforehand.
 
-Arranging a set of morphs is what does the @class{LinearLayoutMorph}
-class, therefore it makes sense to define a new morph based on layout
-then to install a set of morphs into. This is exactly what does the
-@class{LabelGroup} class of the @label{Cuis-Smalltalk-UI} package.
-
+Arranging a set of morphs is what the @class{LinearLayoutMorph} class
+does. Therefore, it makes sense to define a new morph based on layout
+and then install a set of morphs into it. This is exactly what the
+@class{LabelGroup} class of the @label{Cuis-Smalltalk-UI} package does.
 
 @cindex layout @subentry group of morphs
 @cindex morph @subentry label
 @cindex layout @subentry @class{LabelGroup}
-@subsection Arrange visually
+
+@subsection Arrange Visually
 
 This subclass of @class{LinearLayoutMorph} takes a collection of
 textual descriptions and morphs to arrange them in two columns of
@@ -109,11 +109,10 @@ a view.
 @figure{A group of three morphs@comma{} each with its own
 label,ch02-labelGroup,9}
 
-In one layout column, the label group arranges nicely each label and
-widget couple in a row so that all the label cells are of same
-width. What it takes is a collection of label and morph
-associations. The returned layout is to be added in a higher level
-view.
+In one layout column, the label group arranges each label and widget
+pair in a row so that all the label cells are of the same width. What
+it takes is a collection of label and morph associations. The returned
+layout is to be added to a higher-level view.
 
 @smalltalkMethod{LabelGroup class>>example1,
 @return{} self with: @{
@@ -122,30 +121,30 @@ view.
       TextModelMorph withText: '' :: emptyTextDisplayMessage: 'Why Smalltalk?').
    'Smalltalk variants' -> (
       PluggableListMorph
-         withModel: (ListModel with: #('Cuis-Smalltalk' 'Pharo' 'Squeak' 'Amber')) 
-         listGetter: #list 
-         indexGetter: #listIndex 
-         indexSetter: #listIndex: ) @} ::
-   color: Color white paler ;
-   yourself}
+         withModel: (ListModel with: #('Cuis-Smalltalk' 'Pharo' 'Squeak' 'Amber'))
+         listGetter: #list
+         indexGetter: #listIndex
+         indexSetter: #listIndex: )@} ::
+      color: Color white paler ;
+yourself}
 
-The @class{LabelGroup} is a passive object, its only purpose is to
-arrange visually morphs: all the user interactions are managed by the
-widgets. However, in some circumstance, we want both to arrange
+The @class{LabelGroup} is a passive object; its only purpose is to
+arrange morphs visually. All user interactions are managed by the
+widgets. However, in some circumstances, we want both to arrange
 widgets and be notified about specific user interactions. This is what
-does the @class{CheckGroup} and @class{RadioGroup} classes.
-
+the @class{CheckGroup} and @class{RadioGroup} classes do.
 
 @cindex morph @subentry event
 @cindex morph @subentry @class{CheckGroup}
 @cindex morph @subentry @class{RadioGroup}
-@subsection Be notified
+
+@subsection Be Notified
 
 Once morphs are arranged in a layout, it makes sense to be notified
 through events when the user interacts with some of the arranged
-morphs. Under this perspective, the @class{LabelGroup} class is
-absolutely passive, contrary to the @class{CheckGroup} class we will
-present now.
+morphs. From this perspective, the @class{LabelGroup} class is
+absolutely passive, contrary to the @class{CheckGroup} class, which we
+will present now.
 
 As a @class{LabelGroup}, a @class{CheckGroup} presents a collection of
 labels with associated widgets, here @class{CheckButtonMorph}. In a
@@ -156,7 +155,7 @@ selected at once. In a @class{RadioGroup}, a subclass, only one
 @figure{A check group to select among the baby squeaks,ch02-checkGroup,3}
 
 Creating a check group only requires a collection of
-labels@footnote{As an alternative to textual label, arbitrary morphs
+labels@footnote{As an alternative to textual labels, arbitrary morphs
 can be used instead.}:
 
 @smalltalkMethod{CheckGroup class>>example1,
@@ -167,31 +166,30 @@ group buttons do: [:each |
 @return{} group}
 
 In the example, the @smalltalk{#checkSelection} event emitted by each
-check button is captured for report purpose. The attentive reader will
-observe this event is not specific to the check group. Indeed, the
-check group itself emits another specific event
-@smalltalk{#informCheckSelection} when a button is selected:
+check button is captured for reporting purposes. The attentive reader
+will observe that this event is not specific to the check group. Indeed,
+the check group itself emits another specific event,
+@smalltalk{#informCheckSelection}, when a button is selected:
 
 @smalltalkMethod{CheckGroup>>newSelection: radioButton,
 " Inform we have a new selection "
 self triggerEvent: #informCheckSelection with: (self symbolForButton: radioButton)}
-	
-The event is triggered with the button label as attribute. To observe
-its use, experiment with the method @smalltalk{CheckGroup
+
+The event is triggered with the button label as an attribute. To
+observe its use, experiment with the method @smalltalk{CheckGroup
 class>>example2}.
 
 @cindex morph @subentry @class{PluggableScrollPane}
 @node Scroll pane
-@section Scroll pane
-@c Present use case
-Compared to the @class{LinearLayoutMorph} class, the
-@class{PluggableScrollPane} class doesn't have much subclasses. We
-found ones for all sort of list of items or text editor with need to
-scroll contents.
+@section Scroll Pane
 
-This class doesn't need to be subclassed to be useful, each time you
-want to present a morph with a large extent, embed it in a scroll
-pane:
+Compared to the @class{LinearLayoutMorph} class, the
+@class{PluggableScrollPane} class doesn't have many subclasses. We
+found ones for all sorts of lists of items or text editors with the
+need to scroll contents.
+
+This class doesn't need to be subclassed to be useful. Each time you
+want to present a morph with a large extent, embed it in a scroll pane:
 
 @smalltalkExampleCaption{Bezier curves on a scroller, bezierScroller,
 PluggableScrollPane new ::
@@ -203,10 +201,10 @@ PluggableScrollPane new ::
 
 @cindex morph @subentry @class{FlowLayoutMorph}
 Among its few subclasses, @class{FlowLayoutMorph} extends the behavior
-of the layout morph, but doesn't inherit from, to present a collection
-of morphs in a strip spanning in several rows. It is flanked with a
-vertical scroll bar, if needed, inherited from the behavior of the
-@class{PluggableScrollPane}.
+of the layout morph but doesn't inherit from it. It presents a
+collection of morphs in a strip spanning several rows. It is flanked
+with a vertical scroll bar if needed, inherited from the behavior of
+the @class{PluggableScrollPane}.
 
 Its use is simple:
 
@@ -227,13 +225,15 @@ updated simultaneously.
 
 @node File Selector
 @section File Selector
-So far we have observed existing morphs. Let's now build our own new
+
+So far, we have observed existing morphs. Let's now build our own new
 morph.
 
-@subsection Poor man implementation
-First, let's do something quick and fun: a poor man file selector. All
-it takes is to get the entries of a given directory, collect them as
-previews and add them all in a flow layout:
+@subsection Poor Man Implementation
+
+First, let's do something quick and fun: a poor man's file selector.
+All it takes is to get the entries of a given directory, collect them
+as previews, and add them all in a flow layout:
 
 @smalltalkExample{| directories |
 directories := DirectoryEntry userBaseDirectory children collect: [:anEntry |
@@ -248,20 +248,22 @@ FlowLayoutMorph new ::
    openInWorld;
    cells: directories }
 
-Of course at this stage, we can't browse in the directories tree:
+Of course, at this stage, we can't browse the directories tree:
 
 @figure{A basic tool to list the files in a folder,ch02-fileSelectorBasic,7}
 
-To add more behavior to our poor man file selector, we want to make
+To add more behavior to our poor man's file selector, we want to make
 our first morph by reusing existing components.
 
 @cindex morph @subentry @class{FileSelectorPane}
-@subsection First morph design by reuse
-Our morph presents visually files and directories at a given location
-in the disk of the host. As we want this morph to be reused by other
-GUI designer, it doesn't present itself in a window but in a simple
-surface, a pane. Therefore we name it @class{FileSelectorPane}, it
-emits event when the user selects a file. It updates itself with new
+
+@subsection First Morph Design by Reuse
+
+Our morph visually presents files and directories at a given location
+on the disk of the host. As we want this morph to be reused by other
+GUI designers, it doesn't present itself in a window but in a simple
+surface, a pane. Therefore, we name it @class{FileSelectorPane}. It
+emits events when the user selects a file and updates itself with new
 contents when the user double-clicks on a folder.
 
 Because we may have numerous files and directories to present, we
@@ -274,18 +276,18 @@ create our @class{FileSelectorPane} as a subclass of
    poolDictionaries: ''
    category: 'ArtOfMorph'}
 
-In its parents hierarchy, our @class{FileSelectorPane} has the
-@class{PluggableMorph} ancestor, this one is observing a
-@smalltalk{model}. In the present context, the @smalltalk{model}
-represents the currently observed @class{DirectoryEntry}. It is set by
-default to the user base directory:
+In its parent's hierarchy, our @class{FileSelectorPane} has the
+@class{PluggableMorph} ancestor, which observes a @smalltalk{model}.
+In the present context, the @smalltalk{model} represents the currently
+observed @class{DirectoryEntry}. It is set by default to the user base
+directory:
 
 @smalltalkMethod{initialize,
 super initialize.
 self open: DirectoryEntry userBaseDirectory}
 
 When opening a new location, directories and files are collected and
-sorted separatly, in two groups, to build meaningful pre-views:
+sorted separately into two groups to build meaningful previews:
 
 @smalltalkMethod{open: aDirectoryEntry,
 | entryViews |
@@ -300,7 +302,7 @@ entryViews
    addAll: (self previewsFor: model files ).
 self cells: entryViews}
 
-The directory and file entries are sorted appropriately and each one
+The directory and file entries are sorted appropriately, and each one
 is flanked with a preview:
 
 @smalltalkMethod{previewsFor: entries,
@@ -313,8 +315,10 @@ user to browse to the parent directory of the @smalltalk{model}.
 @cindex morph @subentry @class{FilePreviewMorph}
 @cindex event @subentry listener
 @cindex event @subentry @msg{when:send:to:with:}
-Observe below how each directory preview is listening to the double
-click event, in that circumstance the related directory is opened.
+
+Observe below how each directory preview is listening to the
+double-click event. In that circumstance, the related directory is
+opened.
 
 @smalltalkMethod{entryPreviewFor: fileEntry,
 | fileView |
@@ -333,11 +337,11 @@ fileEntry isDirectoryEntry ifTrue: [
 
 We are relying on @class{FilePreviewMorph}, a composition of several
 morphs, itself emitting events to notify about user activities.
- 
-To integrate this widget with other morph, particularly to behave as a
-file selector, we want it to trigger event when the user selects a
+
+To integrate this widget with other morphs, particularly to behave as a
+file selector, we want it to trigger events when the user selects a
 file. A @class{FilePreviewMorph} emits a @smalltalk{#selected} event
-each time the user clicks it, let's capture this event to manage it
+each time the user clicks it. Let's capture this event to manage it
 internally:
 
 @smalltalkMethod{entryPreviewFor: fileEntry,
@@ -350,7 +354,7 @@ fileView when: #selected send: #toggleSelection: to: self with: fileView.
 @cindex event @subentry @msg{triggerEvent:}
 @cindex event @subentry @msg{triggerEvent:with:}
 
-Then we define the behavior for the @msg{toggleSelection:} message:
+Then, we define the behavior for the @msg{toggleSelection:} message:
 
 @smalltalkMethod{toggleSelection: fileView,
 | selectedView |
@@ -367,7 +371,7 @@ selectedView
    ifNil: [self triggerEvent: #noSelection]
    ifNotNil: [self triggerEvent: #selectedFile with: selectedView fileEntry]}
 
-To visualise in the @label{Transcript} window the events propagation,
+To visualize in the @label{Transcript} window the events propagation,
 instantiate a new file selector and capture its events:
 
 @smalltalkExample{| selector |
@@ -377,24 +381,26 @@ selector when: #selectedFile send: #show: to: Transcript}
 
 @cindex event @subentry @msg{removeAllActions}
 @cindex event @subentry remove
-To strop listening to events, just send the @msg{removeAllActions}
+
+To stop listening to events, just send the @msg{removeAllActions}
 message to the listener: @smalltalk{selector removeAllActions}.
 
-Morph are both listener and emitter of events. Doing so is important
-for decoupling the objects between each others and to improve objects
-reuse.
+Morphs are both listeners and emitters of events. Doing so is important
+for decoupling objects from each other and improving object reuse.
 
 We designed the @class{FileSelectorPane} to be itself reusable in
-other morph. In the next section we illustrate its use to improve the
-usability of the @class{StringRequestMoprh}, a morph used -- among
-other things -- to ask the user to key-in a file name; we want to
-improve to make it more user friendly.
+other morphs. In the next section, we illustrate its use to improve the
+usability of the @class{StringRequestMorph}, a morph used—among other
+things—to ask the user to key in a file name; we want to improve it to
+make it more user-friendly.
 
 @cindex morph @subentry @class{StringRequestMorph}
-@subsection Beyond string request morph
+
+@subsection Beyond String Request Morph
+
 As illustrated by the sketch below, the idea is to have a file pane
-that expands on user request, the user then selects a file or a
-directory directly by pointing it on the pane.
+that expands on user request. The user then selects a file or a
+directory directly by pointing to it on the pane.
 
 @figure{A sketch depicting a file selector and its behavior,ch02-fileSelectorSketch,10}
 
@@ -418,9 +424,9 @@ submorphs first addMorph:
       setBalloonText: 'Browse the file system to select a file or directory';
       icon: (Theme current fetch: #( '16x16' 'places' 'folder' )) )}
 
-When unfolding the file browser, we check its current status if absent
-we instantiate a new one just below the text entry, in the alternative
-we just delete it from screen:
+When unfolding the file browser, we check its current status. If absent,
+we instantiate a new one just below the text entry; otherwise, we just
+delete it from the screen:
 
 @smalltalkMethod{toggleFileBrowser,
 fileBrowser ifNotNil: [
@@ -435,8 +441,8 @@ fileBrowser
    morphExtent: self morphExtent * (1@@5);
    openInWorld}
 
-In this method two important points: the @method{directoryEntry}
-method answers the current directory as edited by the user and the
+In this method, two important points: the @method{directoryEntry}
+method answers the current directory as edited by the user, and the
 @smalltalk{#selectedFile} event emitted by the
 @class{FileSelectorPane} is observed and dispatched to the @method{entry:}
 method. Each time the user selects a file, the message @msg{entry:} is
@@ -450,12 +456,12 @@ textMorph hasUnacceptedEdits: true}
 
 @figure{File request morph and its file browser unfolded,ch02-FileRequestMorph,10}
 
-We end here our chapter on designing morph by reusing existing
+We end here our chapter on designing morphs by reusing existing
 ones. From the usability perspective, our @class{FileRequestMorph}
-example is far to be complete; user interface grows on small
+example is far from complete; user interfaces grow on small
 details. There is a lot of room for improvements: the printed
 filenames below the icons are ridiculously short, a distinction
 between file and folder selection when the tool is invoked will allow
-a more precise usability behavior, the button to unfold & fold the
-file browser could have a selected state. These improvements are good
-exercises to strengthen your skill.
+for more precise usability behavior, and the button to unfold and fold
+the file browser could have a selected state. These improvements are
+good exercises to strengthen your skills.
