@@ -1,6 +1,6 @@
-'From Cuis7.5 [latest update: #7387] on 1 August 2025 at 12:00:33 am'!
+'From Cuis7.5 [latest update: #7387] on 4 August 2025 at 5:02:29 pm'!
 'Description '!
-!provides: 'ArtOfMorph' 1 12!
+!provides: 'ArtOfMorph' 1 13!
 !requires: 'UI-Widgets' 1 54 nil!
 !requires: 'UI-Panel' 1 130 nil!
 SystemOrganization addCategory: #ArtOfMorph!
@@ -177,7 +177,7 @@ positioningButtons
 rotationCenter
 	^ `0@0`! !
 
-!Ruler methodsFor: 'as yet unclassified' stamp: 'hlsf 7/31/2025 23:29:50'!
+!Ruler methodsFor: 'as yet unclassified' stamp: 'hlsf 8/1/2025 00:04:38'!
 resizeRuler
 	| event prev |
 	"any thing new to do?"
@@ -187,9 +187,9 @@ resizeRuler
 			prev := lastHandPosition.
 			lastHandPosition := self internalizeFromWorld: event eventPosition.
 			self length: length + (lastHandPosition x - prev x / self ppcm)] 
-		ifFalse: [	lastHandPosition := self internalizeFromWorld: event eventPosition].! !
+		ifFalse: [lastHandPosition := self internalizeFromWorld: event eventPosition].! !
 
-!Ruler methodsFor: 'as yet unclassified' stamp: 'hlsf 7/31/2025 23:29:57'!
+!Ruler methodsFor: 'as yet unclassified' stamp: 'hlsf 8/1/2025 10:35:11'!
 rotateRuler
 	| event p1 v1 v2|
 	"any thing new to do?"
@@ -201,8 +201,8 @@ rotateRuler
 			lastHandPosition := event eventPosition.
 			v2 := lastHandPosition - p1.
 			(v1 isZero or: [v2 isZero]) ifTrue: [^self].
-			self rotateBy:  ((v1 crossProduct: v2) / (v1 r * v2 r)) arcSin	] 
-		ifFalse: [	lastHandPosition := event eventPosition].! !
+			self rotateBy:  ((v1 crossProduct: v2) / (v1 r * v2 r)) arcSin ] 
+		ifFalse: [lastHandPosition := event eventPosition].! !
 
 !EllipseDemo methodsFor: 'accessing' stamp: 'hlsf 6/14/2025 12:17:51'!
 center
