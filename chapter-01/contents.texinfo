@@ -194,8 +194,6 @@ would require being a direct subclass of @class{PlacedMorph}. In the
 process, we will lose the @smalltalk{extent} and @smalltalk{color}
 attributes and will have to define our own.
 
-@subsection Grow on User Request
-
 @subsection Grow on user request
 Now let's combine the mouse hover and mouse click events: at button 1
 click, the ellipse shrinks slightly; at button 2 click, it grows
