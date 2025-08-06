@@ -3,7 +3,7 @@
 
 @*
 
-In this chapter you will learn how to design new morph -- in the idea
+In this chapter you will learn how to design a new morph -- in the idea
 of a new widget -- by assembling existing ones. We first illustrate
 the topic with existing morphs from the @cuis{} system and the
 @label{Cuis-Smalltalk-UI} repository. Then, we dive into the design of a
@@ -19,17 +19,16 @@ design is rigorously tested by reusing it in an end-user @acronym{GUI}.
 @end menu
 
 
-
 @cindex morph @subentry subclasses
 @node From where to start?
 @section From Where to Start?
 
 Design by reuse indeed, but from where to start? Which classes should
-we make reuse from? As often, the @cuis{} system may be our best
-guide, let's interrogate it to learn which morph has more subclasses.
+we reuse? As often, the @cuis{} system may be our best
+guide; let's interrogate it to learn which morph has more subclasses.
 
 We collect, for each existing morph in the @cuis{} system, the
-quantity of subclasses, then we sort the result.
+number of subclasses, then we sort the result.
 
 @smalltalkExample{| hallOfFame |
 hallOfFame @assign{} Morph allSubclasses collect: [:each |
@@ -54,7 +53,7 @@ require overriding the @method{drawOn:} method.
 
 @item
 @class{LinearLayoutMorph}. It has 11 subclasses. It is designed to
-assemble morphs in a new morph. Using this class for reuse makes
+assemble morphs into a new morph. Using this class for reuse makes
 perfect sense, and we already know how to use it.
 
 @item
@@ -85,13 +84,13 @@ by reuse: @class{LinearLayoutMorph} and @class{PluggableScrollPane}.
 @node Layout
 @section Layout
 
-This section will be very familiar with the booklet @emph{Design GUI
+This section will be very familiar to readers of the booklet @emph{Design GUI
 with Morph}, and it is a good idea to read its @url{Layout
 components,https://DrCuis.github.io/DesignGUI/Layout-components.html}
 chapter beforehand.
 
 Arranging a set of morphs is what the @class{LinearLayoutMorph} class
-does. Therefore, it makes sense to define a new morph based on layout
+does. Therefore, it makes sense to define a new morph based on a layout
 and then install a set of morphs into it. This is exactly what the
 @class{LabelGroup} class of the @label{Cuis-Smalltalk-UI} package does.
 
@@ -131,7 +130,7 @@ yourself}
 The @class{LabelGroup} is a passive object; its only purpose is to
 arrange morphs visually. All user interactions are managed by the
 widgets. However, in some circumstances, we want both to arrange
-widgets and be notified about specific user interactions. This is what
+widgets and to be notified about specific user interactions. This is what
 the @class{CheckGroup} and @class{RadioGroup} classes do.
 
 @cindex morph @subentry event
@@ -143,7 +142,7 @@ the @class{CheckGroup} and @class{RadioGroup} classes do.
 Once morphs are arranged in a layout, it makes sense to be notified
 through events when the user interacts with some of the arranged
 morphs. From this perspective, the @class{LabelGroup} class is
-absolutely passive, contrary to the @class{CheckGroup} class, which we
+absolutely passive, unlike the @class{CheckGroup} class, which we
 will present now.
 
 As a @class{LabelGroup}, a @class{CheckGroup} presents a collection of
@@ -248,7 +247,7 @@ FlowLayoutMorph new ::
    openInWorld;
    cells: directories }
 
-Of course, at this stage, we can't browse the directories tree:
+Of course, at this stage, we can't browse the directory tree:
 
 @figure{A basic tool to list the files in a folder,ch02-fileSelectorBasic,7}
 
@@ -260,7 +259,7 @@ our first morph by reusing existing components.
 @subsection First Morph Design by Reuse
 
 Our morph visually presents files and directories at a given location
-on the disk of the host. As we want this morph to be reused by other
+on the host's disk. As we want this morph to be reused by other
 GUI designers, it doesn't present itself in a window but in a simple
 surface, a pane. Therefore, we name it @class{FileSelectorPane}. It
 emits events when the user selects a file and updates itself with new
@@ -336,7 +335,7 @@ fileEntry isDirectoryEntry ifTrue: [
 @return{} fileView }
 
 We are relying on @class{FilePreviewMorph}, a composition of several
-morphs, itself emitting events to notify about user activities.
+morphs, which itself emits events to notify about user activities.
 
 To integrate this widget with other morphs, particularly to behave as a
 file selector, we want it to trigger events when the user selects a
@@ -371,7 +370,7 @@ selectedView
    ifNil: [self triggerEvent: #noSelection]
    ifNotNil: [self triggerEvent: #selectedFile with: selectedView fileEntry]}
 
-To visualize in the @label{Transcript} window the events propagation,
+To visualize in the @label{Transcript} window the event propagation,
 instantiate a new file selector and capture its events:
 
 @smalltalkExample{| selector |
@@ -412,7 +411,7 @@ Let's extend the behavior of @class{StringRequestMoprh}:
    poolDictionaries: ''
    category: 'ArtOfMorph'}
 
-We add an the instance variable @smalltalk{fileBrowser} to hold our
+We add the instance variable @smalltalk{fileBrowser} to hold our
 file selector when it is unfolded. We override a few methods from
 @class{StringRequestMorph}. We add a button to unfold/fold the file
 browser:
@@ -424,7 +423,7 @@ submorphs first addMorph:
       setBalloonText: 'Browse the file system to select a file or directory';
       icon: (Theme current fetch: #( '16x16' 'places' 'folder' )) )}
 
-When unfolding the file browser, we check its current status. If absent,
+When unfolding the file browser, we check its current status. If it's absent,
 we instantiate a new one just below the text entry; otherwise, we just
 delete it from the screen:
 
@@ -442,7 +441,7 @@ fileBrowser
    openInWorld}
 
 In this method, two important points: the @method{directoryEntry}
-method answers the current directory as edited by the user, and the
+method returns the current directory as edited by the user, and the
 @smalltalk{#selectedFile} event emitted by the
 @class{FileSelectorPane} is observed and dispatched to the @method{entry:}
 method. Each time the user selects a file, the message @msg{entry:} is
@@ -461,7 +460,7 @@ ones. From the usability perspective, our @class{FileRequestMorph}
 example is far from complete; user interfaces grow on small
 details. There is a lot of room for improvements: the printed
 filenames below the icons are ridiculously short, a distinction
-between file and folder selection when the tool is invoked will allow
+between file and folder selection when the tool is invoked would allow
 for more precise usability behavior, and the button to unfold and fold
 the file browser could have a selected state. These improvements are
 good exercises to strengthen your skills.

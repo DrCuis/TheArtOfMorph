@@ -1,6 +1,6 @@
-'From Cuis7.5 [latest update: #7387] on 4 August 2025 at 5:02:29 pm'!
+'From Cuis7.5 [latest update: #7387] on 6 August 2025 at 9:39:50 pm'!
 'Description '!
-!provides: 'ArtOfMorph' 1 13!
+!provides: 'ArtOfMorph' 1 14!
 !requires: 'UI-Widgets' 1 54 nil!
 !requires: 'UI-Panel' 1 130 nil!
 SystemOrganization addCategory: #ArtOfMorph!
@@ -130,7 +130,7 @@ length: newLength
 	self positioningButtons.
 	self redrawNeeded ! !
 
-!Ruler methodsFor: 'accessing' stamp: 'hlsf 7/31/2025 18:34:21'!
+!Ruler methodsFor: 'accessing' stamp: 'hlsf 8/5/2025 11:05:48'!
 ppcm
 " pixels per cm "
 	^ 50.0! !
@@ -208,8 +208,8 @@ rotateRuler
 center
 	^  extent / 2.0! !
 
-!EllipseDemo methodsFor: 'accessing' stamp: 'hlsf 6/14/2025 13:32:35'!
-semiAxises
+!EllipseDemo methodsFor: 'accessing' stamp: 'hlsf 8/6/2025 21:39:03'!
+semiAxes
 " the semi minor and major axis of the ellipse"
 	^  (extent / 2.0) - shrink ! !
 
@@ -226,10 +226,10 @@ initialize
 	'Click it with left or right button to shrink or to grow the ellipse.' print.
 	'Move mouse over the circle and press r, g, or b to change its color.' print.! !
 
-!EllipseDemo methodsFor: 'drawing' stamp: 'hlsf 6/14/2025 12:56:07'!
+!EllipseDemo methodsFor: 'drawing' stamp: 'hlsf 8/6/2025 21:39:03'!
 drawOn: aCanvas
 	aCanvas fillColor: color do: [
- 		aCanvas ellipseCenter: self center radius: self semiAxises ]! !
+ 		aCanvas ellipseCenter: self center radius: self semiAxes ]! !
 
 !EllipseDemo methodsFor: 'event handling testing' stamp: 'hlsf 6/19/2025 23:48:44'!
 handlesKeyboard
