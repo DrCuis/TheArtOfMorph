@@ -1,6 +1,7 @@
 @copying
-``@value{bookletTitle}'' booklet is for @cuis{} (@value{cuisVersion}), a free and modern
-implementation of the Smalltalk language and environment.
+``@value{bookTitle} (@value{bookSubTitle})'' is for @cuis{}
+(@value{cuisVersion}), a free and modern implementation of the
+Smalltalk language and environment.
 
 Copyright @copyright{} 2025 @value{writers}
 @*
@@ -11,7 +12,7 @@ Compilation : @today{}
 
 Documentation source: @url{https://github.com/DrCuis/TheArtOfMorph} 
 
-The contents of this booklet are protected under Creative Commons
+The contents of this book are protected under Creative Commons
 Attribution-ShareAlike 4.0 International.
 
 @i{You are free to:}

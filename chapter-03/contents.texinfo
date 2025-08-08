@@ -366,9 +366,9 @@ at first, but it also exposes the wonderful design of @cuis{}'s Morph
 
 @figure{A handy button to rotate the ruler,ch03-rulerRotateButton,7}
 
-Our next move is to give the user the ability to change the length of their ruler,
-the @smalltalk{length} attribute. Therefore, we insert a second button to do so
-and, in the process, refactor the method:
+Our next move is to give the user the ability to change the length of
+the ruler, the @smalltalk{length} attribute. Therefore, we insert a
+second button to do so and, in the process, refactor the method:
 
 @smalltalkMethod{insertButtons,
 | btn buttonExtent |
@@ -423,6 +423,8 @@ shrink when the mouse pointer moves in the direction of the smallest value
 of the ruler's x-axis and its length should increase when the mouse
 pointer moves in the direction of the greatest value of its x-axis.
 
+@figure{The ruler and its coordinate system exposed,ch03-rulerCoordinateSystem,7}
+
 To determine these behaviors of the mouse pointer, the pointer's coordinates -- expressed
 in the world coordinate system -- must be converted into the local coordinate system
 of the ruler. This is exactly what is done by internalizing the mouse position
@@ -431,7 +433,7 @@ abscissa delta between the two last mouse positions is calculated to
 determine the change in the ruler's length. And because this calculation is performed
 in the ruler's coordinate system, it works regardless of its pivoted state.
 
-@figure{A handy button to resize the ruler,ch03-rulerResizeButton,4}
+@figure{A handy button to resize the ruler,ch03-rulerResizeButton,3}
 
 Of course, when the length is adjusted, the positions of the buttons
 are recomputed and the ruler is flagged for redrawing:

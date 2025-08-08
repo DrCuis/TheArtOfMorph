@@ -5,8 +5,8 @@
 @c %**end of header
 
 @titlepage
-   @title @value{bookletTitle}
-   @subtitle Craft your own Morph
+   @title @value{bookTitle}
+   @subtitle @value{bookSubTitle}
    @* @* @* @*
 
    @bookQuote
@@ -24,14 +24,9 @@
 @end iftex
 
 @node Top
-
 @bookQuote
 
-@*
-
-Deep inside Morph
-
-@top @value{bookletTitle}
+@top @value{bookTitle} -- @value{bookSubTitle}
 
 @ifnottex
   @shortcontents

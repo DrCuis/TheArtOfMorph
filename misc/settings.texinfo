@@ -1,6 +1,7 @@
 @documentlanguage en
 @documentencoding UTF-8
-@set bookletTitle The Art of Morph - (DRAFT)
+@set bookTitle The Morph Book vol. II
+@set bookSubTitle The Art of Morph
 @set cuisVersion 7.0 or later
 @set writers Hilaire Fernandes
 @settitle @value{bookletTitle}
@@ -36,9 +37,9 @@ Cuis-Smalltalk
 @macro thanks
 @c Alphabetical list of reviewers
 Thanks to Mark Volkmann to share his examples.
-@*
-Thanks to ... for the reviews of the booklet, suggestions and borrowed
-texts. Your help is very valuable.
+@c @*
+@c Thanks to ... for the reviews of the booklet, suggestions and borrowed
+@c texts. Your help is very valuable.
 @end macro
 
 @macro vm
