@@ -84,10 +84,10 @@ by reuse: @class{LinearLayoutMorph} and @class{PluggableScrollPane}.
 @node Layout
 @section Layout
 
-This section will be very familiar to readers of the booklet @emph{Design GUI
-with Morph}, and it is a good idea to read its @url{Layout
-components,https://DrCuis.github.io/DesignGUI/Layout-components.html}
-chapter beforehand.
+This section will be very familiar to readers of the booklet
+@emph{Design GUI with Morph}, and it is a good idea to read its
+@url{https://DrCuis.github.io/DesignGUI/Layout-components.html,Layout
+components chapter} beforehand.
 
 Arranging a set of morphs is what the @class{LinearLayoutMorph} class
 does. Therefore, it makes sense to define a new morph based on a layout
